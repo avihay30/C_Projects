@@ -7,22 +7,25 @@ float avg(float[], int);
 
 int main() 
 {
-	int i;
-	float timeArr[NUM_OF_RUNNERS];
+	int i, belowAvgRunners;
+	float timeArr[NUM_OF_RUNNERS], avgOfArr;
 	printf("Enter times, please: ");
+	// getting inputs for every runner and inserting to the array.
 	for (i = 0; i < NUM_OF_RUNNERS; i++)
 		scanf("%f", &timeArr[i]);
 
-	float avgOfArr = avg(timeArr, NUM_OF_RUNNERS);
-	int belowAvgRunners = 0;
-	for (i = 0; i < NUM_OF_RUNNERS; i++)
-		if (timeArr[i] < avgOfArr)
+	avgOfArr = avg(timeArr, NUM_OF_RUNNERS);
+	belowAvgRunners = 0;
+	for (i = 0; i < NUM_OF_RUNNERS; i++) // itereting over the array.
+		if (timeArr[i] < avgOfArr) // checking if runner lower than avg.
 			belowAvgRunners++;
 
 	printf("The number of runners, running below the average time is %d.\n", belowAvgRunners);
 	return 0;
 }
 
+/* Function gets a pointer to array and it's size,
+   and returns the average of all elements in the array. */
 float avg(float arr[], int size)
 {
 	float sum = 0;
