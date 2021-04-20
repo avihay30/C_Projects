@@ -1,3 +1,0 @@
-﻿  uuuSource.c
-C:\Develpment\C_Projects\MatamLabs\MatamLab4\MatamLab4\uuuSource.c(50,11): warning C4477: 'printf' : format string '%ld' requires an argument of type 'long', but variadic argument 3 has type 'double'
-  MatamLab4.vcxproj -> C:\Develpment\C_Projects\MatamLabs\MatamLab4\Debug\MatamLab4.exe
