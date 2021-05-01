@@ -34,7 +34,13 @@ int main()
 		if (arr[i].avg > 85)
 			Print_One(&arr[i]);
 	}
+	/* Freeing the allocations of the names first
+   than the allocation of the structure */
+	for (i = 0; i < size; i++) {
+		free(arr[i].name);
+	}
 	free(arr);
+
 	return 0;
 }
 
