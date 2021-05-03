@@ -1,20 +1,20 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 
+typedef enum { FALSE, TRUE } Bool;
+
 #define M 6 // work hours
 
 void printSchedule(int[][M], int);
-int isScheduleOk(int[][M]);
-int isStationPickupOk(int[]);
+Bool isScheduleOk(int[][M]);
+Bool isDriverOk(int[], char*);
+Bool isStationPickupOk(int[]);
 void setDriversWithOverlapStations(int[][M], int[]);
-void isDriversDriveOverLimit(int[][M], int[]);
+void setDriversDriveOverLimit(int[][M], int[]);
 void setLongestSeqToArr(int[], int);
-int isDriverOk(int[], char*);
 
 #define N 5 // pickup points
 #define K 10 // num of drivers
-#define TRUE 1
-#define FALSE 0
 
 int main()
 {
@@ -51,9 +51,9 @@ void printSchedule(int scheduleArr[][M], int startHour)
 	printf("\n");
 }
 
-int isScheduleOk(int scheduleArr[][M])
+Bool isScheduleOk(int scheduleArr[][M])
 {
-	int i, tempFlag = TRUE, isSchedOk = TRUE;
+	int i, isSchedOk = TRUE;
 	int errorDrivers[K] = { 0 }; // initialize arr with K drivers.
 	char* overlapErrMessage = "\nThe drivers that have two or more stations in one hour are:\n";
 	char* overDriveErrMessage = "\nThe drivers that drive three hours in a row are:\n";
@@ -61,9 +61,8 @@ int isScheduleOk(int scheduleArr[][M])
 	// checking if stations pickup ok.
 	for (i = 0; i < N; i++) {
 		if (!isStationPickupOk(scheduleArr[i])) {
-			if (tempFlag) {
+			if (isSchedOk) {
 				printf("\nThe stations with no collection for more than two hours are:\n");
-				tempFlag = FALSE;
 				isSchedOk = FALSE;
 			}
 			printf("station number %d\n", i + 1);
@@ -75,17 +74,16 @@ int isScheduleOk(int scheduleArr[][M])
 		isSchedOk = FALSE;
 
 	// checking if drivers over limit time.
-	isDriversDriveOverLimit(scheduleArr, errorDrivers);
+	setDriversDriveOverLimit(scheduleArr, errorDrivers);
 	if (!isDriverOk(errorDrivers, overDriveErrMessage))
 		isSchedOk = FALSE;
 
 	return isSchedOk;
 }
 
-int isDriverOk(int errorDrivers[], char* preMess)
+Bool isDriverOk(int errorDrivers[], char* preMess)
 {
-	int i, isCheckOk;
-	isCheckOk = TRUE;
+	int i, isCheckOk = TRUE;
 	for (i = 0; i < K; i++) {
 		if (errorDrivers[i] == -1) {
 			if (isCheckOk) {
@@ -99,7 +97,7 @@ int isDriverOk(int errorDrivers[], char* preMess)
 }
 
 
-int isStationPickupOk(int station[])
+Bool isStationPickupOk(int station[])
 {
 	int i;
 	for (i = 0; i < M - 1; i++) {
@@ -127,7 +125,7 @@ void setDriversWithOverlapStations(int scheduleArr[][M], int overlapDrivers[])
 	}
 }
 
-void isDriversDriveOverLimit(int scheduleArr[][M], int overDriveDrivers[])
+void setDriversDriveOverLimit(int scheduleArr[][M], int overDriveDrivers[])
 {
 	/* "driversSeqArr" is matrix with rows for each driver.
 	   col[0] holds the longestSeqCounted(not including seq that didn't break).

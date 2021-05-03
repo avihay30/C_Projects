@@ -21,7 +21,7 @@ int main()
 	userFractions = (fraction*)malloc(sizeof(fraction)); // empty array with initial size of 1
 	if (userFractions == NULL) {
 		printf("AllocationError: system couldn't allocate memory!");
-		exit(1);
+		return 1;
 	}
 	printf("Enter fractions by pairs of integers(0 0 to finish):\n");
 	arrSize = getFractionsInput(userFractions);

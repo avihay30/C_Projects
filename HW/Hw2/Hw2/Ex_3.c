@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define SIZE_OF_CODE 10
 
@@ -11,20 +12,33 @@ typedef struct department {
 	int soldItems;
 } department;
 
-void inputToDepartmentArr(department[], int);
-int isStrInputOk(char*, int);
-void freeAllNames(department[], int);
+typedef enum { FALSE, TRUE } Bool;
 
-#define N 10
+void inputToDepartmentArr(department[], int);
+Bool isStrInputOk(char*, int);
+void freeAllNames(department[], int);
+Bool isPositiveInt(float);
+void setPtrArrToBestWorstFirst(department* []);
+void switchAddress(department**, department**);
+void printDepartment(department* [], int, char*);
+
+#define N 3
 #define SIZE_OF_NAME 20
 #define STR_TEMP_SIZE 256
-#define TRUE 1
-#define FALSE 0
 
 int main()
 {
-	department departmentArr[N];
+	department departmentArr[N], *depPtrArr[N];
+	int i;
+
 	inputToDepartmentArr(departmentArr, N);
+	for (i = 0; i < N; i++) // setting the array of pointers
+		depPtrArr[i] = &departmentArr[i];
+	
+	setPtrArrToBestWorstFirst(depPtrArr);
+	printf("|\\/\\/> RESULTS <\\/\\/|");
+	printDepartment(depPtrArr, 0, "Best");
+	printDepartment(depPtrArr, 1, "Worst");
 
 	return 0;
 }
@@ -32,18 +46,19 @@ int main()
 void inputToDepartmentArr(department depArr[], int size)
 {
 	int i;
+	float dummyNum;
 	char tempStr[STR_TEMP_SIZE];
 	for (i = 0; i < size; i++) {
 		printf("Enter department %d:", i + 1);
 		do {
 			printf("\n\tEnter code: ");
-			fgets(tempStr, STR_TEMP_SIZE, stdin);
+			gets(tempStr);
 		} while (!isStrInputOk(tempStr, SIZE_OF_CODE));
 		strcpy(depArr[i].code, tempStr);
 
 		do {
 			printf("\tEnter name: ");
-			fgets(tempStr, STR_TEMP_SIZE, stdin);
+			gets(tempStr);
 		} while (!isStrInputOk(tempStr, SIZE_OF_NAME));
 		depArr[i].name = (char*)malloc(strlen(tempStr) + 1); // sizeOf(char) = 1
 		if (depArr[i].name == NULL) {
@@ -55,9 +70,11 @@ void inputToDepartmentArr(department depArr[], int size)
 
 		while (TRUE) {
 			printf("\tEnter number of products sold today: ");
-			if (scanf("%d", &depArr[i].soldItems)) // if equal to 0
+			if (scanf("%f", &dummyNum) && isPositiveInt(dummyNum)) { // if equal to 0
+				depArr[i].soldItems = (int)dummyNum;
 				break;
-			printf("\tNot valid input, please enter a number!\n");
+			}
+			printf("\tNot valid input, please enter a positive int number!\n");
 			printf("\t``````````````````````````````````````````\n");
 			rewind(stdin);
 		}
@@ -81,4 +98,38 @@ void freeAllNames(department depArr[], int size)
 	int i; 
 	for (i = 0; i < size; i++)
 		free(depArr[i].name);
+}
+
+Bool isPositiveInt(float fNum)
+{
+	// decimal points equal to zero and number isn't negative.
+	if (floor(fNum) == ceil(fNum) && fNum >= 0)
+		return TRUE;
+	return FALSE;
+}
+
+void setPtrArrToBestWorstFirst(department *depPtrArr[])
+{
+	int i;
+	for (i = 1; i < N; i++) {
+		if (depPtrArr[0]->soldItems < depPtrArr[i]->soldItems)
+			switchAddress(&depPtrArr[0], &depPtrArr[i]);
+		if (i > 1 && depPtrArr[1]->soldItems > depPtrArr[i]->soldItems)
+			switchAddress(&depPtrArr[1], &depPtrArr[i]);
+	}
+}
+
+void switchAddress(department** address1, department** address2)
+{
+	department* tempAddress;
+	tempAddress = *address1;
+	*address1 = *address2;
+	*address2 = tempAddress;
+}
+
+void printDepartment(department* depPtrArr[], int index, char* title)
+{
+	printf("\n%s Department is:\n", title);
+	printf("\tCode of department: %s\n", depPtrArr[index]->code);
+	printf("\tName of department: %s\n", depPtrArr[index]->name);
 }
