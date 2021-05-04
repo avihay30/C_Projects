@@ -40,6 +40,7 @@ int main()
 	printDepartment(depPtrArr, 0, "Best");
 	printDepartment(depPtrArr, 1, "Worst");
 
+	freeAllNames(departmentArr, N);
 	return 0;
 }
 

@@ -32,6 +32,8 @@ int main()
 	set_2d(a, m, n);
 	print_2d(a, m, n);
 
+	freeAllChildren(a, i);
+	free(a);
 	return 0;
 }
 
