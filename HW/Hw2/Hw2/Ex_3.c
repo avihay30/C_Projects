@@ -7,7 +7,7 @@
 #define SIZE_OF_CODE 10
 
 typedef struct department {
-	char code[SIZE_OF_CODE + 1];
+	char code[SIZE_OF_CODE + 1]; // + 1 for '\0'
 	char *name;
 	int soldItems;
 } department;
@@ -44,23 +44,25 @@ int main()
 	return 0;
 }
 
+/* Function gets a fixed size array of departments and it's size,
+   and fills the array with user inputs departments. */
 void inputToDepartmentArr(department depArr[], int size)
 {
 	int i;
-	float dummyNum;
-	char tempStr[STR_TEMP_SIZE];
+	float dummyNum; // for testing user input.
+	char tempStr[STR_TEMP_SIZE]; // for testing user input.
 	for (i = 0; i < size; i++) {
 		printf("Enter department %d:", i + 1);
-		do {
+		do { // getting user input for code
 			printf("\n\tEnter code: ");
 			gets(tempStr);
-		} while (!isStrInputOk(tempStr, SIZE_OF_CODE));
+		} while (!isStrInputOk(tempStr, SIZE_OF_CODE)); // checking if input longer than required
 		strcpy(depArr[i].code, tempStr);
 
-		do {
+		do { // getting user input for name
 			printf("\tEnter name: ");
 			gets(tempStr);
-		} while (!isStrInputOk(tempStr, SIZE_OF_NAME));
+		} while (!isStrInputOk(tempStr, SIZE_OF_NAME)); // checking if input longer than required
 		depArr[i].name = (char*)malloc(strlen(tempStr) + 1); // sizeOf(char) = 1
 		if (depArr[i].name == NULL) {
 			printf("AllocationError: system couldn't allocate memory!");
@@ -69,21 +71,24 @@ void inputToDepartmentArr(department depArr[], int size)
 		}
 		strcpy(depArr[i].name, tempStr);
 
-		while (TRUE) {
+		while (TRUE) { // getting user input for soldItems
 			printf("\tEnter number of products sold today: ");
-			if (scanf("%f", &dummyNum) && isPositiveInt(dummyNum)) { // if equal to 0
+			// checking if scanf == 0 and the inputted num is positive. 
+			if (scanf("%f", &dummyNum) && isPositiveInt(dummyNum)) {
 				depArr[i].soldItems = (int)dummyNum;
 				break;
 			}
 			printf("\tNot valid input, please enter a positive int number!\n");
 			printf("\t``````````````````````````````````````````\n");
-			rewind(stdin);
+			rewind(stdin); // in case user inputs string.
 		}
 		rewind(stdin);
 		puts("____________________");
 	}
 }
 
+
+/* Function checks wether the string is in required length */
 int isStrInputOk(char *str, int maxSizeNeeded)
 {
 	if (strlen(str) > maxSizeNeeded) {
@@ -101,18 +106,22 @@ void freeAllNames(department depArr[], int size)
 		free(depArr[i].name);
 }
 
+/* Function gets a float number and return wether that number is positive or not. */
 Bool isPositiveInt(float fNum)
 {
-	// decimal points equal to zero and number isn't negative.
+	// checking decimal points equal to zero and number isn't negative.
 	if (floor(fNum) == ceil(fNum) && fNum >= 0)
 		return TRUE;
-	return FALSE;
+	return FALSE; // logical else
 }
 
+/* Function gets an array of pointers
+   and set the first to point to the largest and second to point the smallest
+   (according to number of soldItems). */
 void setPtrArrToBestWorstFirst(department *depPtrArr[])
 {
 	int i;
-	for (i = 1; i < N; i++) {
+	for (i = 1; i < N; i++) { // iterating over the pointers.
 		if (depPtrArr[0]->soldItems < depPtrArr[i]->soldItems)
 			switchAddress(&depPtrArr[0], &depPtrArr[i]);
 		if (i > 1 && depPtrArr[1]->soldItems > depPtrArr[i]->soldItems)
@@ -120,6 +129,7 @@ void setPtrArrToBestWorstFirst(department *depPtrArr[])
 	}
 }
 
+/* Function gets two address of pointers and assign one to point the other. */
 void switchAddress(department** address1, department** address2)
 {
 	department* tempAddress;
@@ -128,6 +138,8 @@ void switchAddress(department** address1, department** address2)
 	*address2 = tempAddress;
 }
 
+/* Function gets array of pointers that points to departments,
+   and an index and prints the parameters of the department with title. */
 void printDepartment(department* depPtrArr[], int index, char* title)
 {
 	printf("\n%s Department is:\n", title);

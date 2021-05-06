@@ -3,8 +3,8 @@
 #include <stdlib.h>
 
 typedef struct fraction {
-	int numerator;
-	int denominator;
+	int numerator; // mone
+	int denominator; // mehane
 } fraction;
 
 int getFractionsInput(fraction[]);
@@ -16,8 +16,8 @@ void printSimplied(fraction*);
 
 int main()
 {
-	int arrSize;
 	fraction* userFractions, simplifiedFrac;
+	int arrSize; // will hold the actual size after user input.
 	userFractions = (fraction*)malloc(sizeof(fraction)); // empty array with initial size of 1
 	if (userFractions == NULL) {
 		printf("AllocationError: system couldn't allocate memory!");
@@ -26,7 +26,7 @@ int main()
 	printf("Enter fractions by pairs of integers(0 0 to finish):\n");
 	arrSize = getFractionsInput(userFractions);
 
-	printFractions(userFractions, arrSize);
+	printFractions(userFractions, arrSize); // prints user input fractions.
 	simplify(userFractions, arrSize, &simplifiedFrac);
 	printSimplied(&simplifiedFrac);
 
@@ -34,19 +34,22 @@ int main()
 	return 0;
 }
 
+/* Function gets an empty array with size of 1,
+   and realloc according to user inputs, until frac is (0/0) */
 int getFractionsInput(fraction fractionArr[])
 {
 	int arrSize = 0;
-	fraction frac;
+	fraction frac; // temp fraction for testing user input before realloc.
 	while (1) {
 		if (arrSize > 0 && frac.denominator == 0) {
 			printf("\nYou can't divide by 0, please insert again...\n");
 			arrSize--;
 		}
-		else if (arrSize > 0) { // iserting last inputted fraction.
+		else if (arrSize > 0) { // inserting last inputted fraction.
 			insertFractionToArr(&fractionArr, &frac, arrSize - 1);
 		}
 		printf("%d (mone mehane): ", arrSize + 1);
+		// assume user input ints (noted in requirements).
 		scanf("%d %d", &frac.numerator, &frac.denominator);
 		if (frac.numerator == 0 && frac.denominator == 0)
 			break;
@@ -55,6 +58,8 @@ int getFractionsInput(fraction fractionArr[])
 	return arrSize;
 }
 
+/* Function gets address of fraction array and a new frac
+   and realloc new slot in order to insert the new frac. */
 void insertFractionToArr(fraction **fractionArr, fraction *frac, int index)
 {
 	fraction *tempP;
@@ -65,34 +70,39 @@ void insertFractionToArr(fraction **fractionArr, fraction *frac, int index)
 			printf("AllocationError: system couldn't allocate memory!");
 			exit(1);
 		}
+		// assinning the pointer to the "new"(not always changes) location.
 		*fractionArr = tempP;
 	}
-	(*fractionArr)[index] = *frac;
+	(*fractionArr)[index] = *frac; // inserting the new frac to array.
 }
 
-void simplify(fraction fractionArr[], int size, fraction *simlifiedFrac)
+/* Function gets an array of fractions and it's size and a pointer to empty fraction,
+   and retruns the simplified sum of all fractions in "*simplifiedFrac"*/
+void simplify(fraction fractionArr[], int size, fraction *simplifiedFrac)
 {
 	int i, greatDivder = 1, gcdOfFrac;
-	for (i = 0; i < size; i++)
+	for (i = 0; i < size; i++) // calculating the greatest common denominator.
 		greatDivder *= fractionArr[i].denominator;
 	for (i = 0; i < size; i++) {
 		fractionArr[i].numerator *= greatDivder / fractionArr[i].denominator;
 		fractionArr[i].denominator = greatDivder;
 	}
-	simlifiedFrac->denominator = greatDivder;
-	simlifiedFrac->numerator = 0; // reset
+	simplifiedFrac->denominator = greatDivder;
+	simplifiedFrac->numerator = 0; // reset
 	for (i = 0; i < size; i++) // adding all numerators to one.
-		simlifiedFrac->numerator += fractionArr[i].numerator;
+		simplifiedFrac->numerator += fractionArr[i].numerator;
 
-	gcdOfFrac = gcd(simlifiedFrac->numerator, simlifiedFrac->denominator);
-	simlifiedFrac->numerator /= gcdOfFrac;
-	simlifiedFrac->denominator /= gcdOfFrac;
+	gcdOfFrac = gcd(simplifiedFrac->numerator, simplifiedFrac->denominator);
+	simplifiedFrac->numerator /= gcdOfFrac;
+	simplifiedFrac->denominator /= gcdOfFrac;
 }
 
+/* Function returns the gcd between two numbers */
 int gcd(int a, int b) {
 	return (b == 0) ? a : gcd(b, a % b);
 }
 
+/* Function prints all fractions in oneline with '+' between each one */
 void printFractions(fraction fractionArr[], int size)
 {
 	int i;
@@ -103,14 +113,17 @@ void printFractions(fraction fractionArr[], int size)
 	}
 }
 
-void printSimplied(fraction *simplfiedFrac)
+/* Function prints the result (simplified fraction) */
+void printSimplied(fraction *simplifiedFrac)
 {
 	int intNum, moduleNum;
-	printf(" = %d/%d = ", simplfiedFrac->numerator, simplfiedFrac->denominator);
-	intNum = simplfiedFrac->numerator / simplfiedFrac->denominator;
-	moduleNum = simplfiedFrac->numerator % simplfiedFrac->denominator;
+	// printing fraction as is.
+	printf(" = %d/%d = ", simplifiedFrac->numerator, simplifiedFrac->denominator);
+	intNum = simplifiedFrac->numerator / simplifiedFrac->denominator;
+	moduleNum = simplifiedFrac->numerator % simplifiedFrac->denominator;
+	// checking if possible to break it to int and (if needed) a fraction
 	if (intNum != 0)
 		printf("%d", intNum);
 	if (moduleNum != 0)
-		printf("%s%d/%d", (intNum == 0) ? "" : " and ", moduleNum, simplfiedFrac->denominator);
+		printf("%s%d/%d", (intNum == 0) ? "" : " and ", moduleNum, simplifiedFrac->denominator);
 }

@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 #define N 5
-typedef  enum { FALSE, TRUE } BOOL;
+typedef enum { FALSE, TRUE } BOOL;
 BOOL Int_Sum(void*, void*, void*);
 BOOL Float_Sum(void*, void*, void*);
 BOOL Sum(BOOL(*f)(void*, void*, void*), void** p_num, void* number);
@@ -12,7 +12,7 @@ BOOL Sum(BOOL(*f)(void*, void*, void*), void** p_num, void* number);
 int main()
 {
 	int num[] = { 3,5,23,5,6 }, i, value;
-	float  fnum[] = { 3.5,5.0,2.3,5.8,6.2 }, fvalue;
+	float fnum[] = { 3.5,5.0,2.3,5.8,6.2 }, fvalue;
 	void* p_num[N];
 
 	for (i = 0; i < N; i++)
