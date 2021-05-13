@@ -15,6 +15,7 @@ void setLongestSeqToArr(int[], int);
 
 #define N 5 // num of stations
 #define K 10 // num of drivers
+#define START_HOUR 10
 
 int main()
 {
@@ -23,9 +24,8 @@ int main()
 					 {4, 5, 6, 6, 1, 7}, 
 					 {0, 4, 3, 2, 5, 0}, 
 					 {0, 8, 7, 3, 2, 8}};
-	int startHours = 10;
 
-	printSchedule(bus, startHours); // prints the schedule table.
+	printSchedule(bus, START_HOUR); // prints the schedule table.
 	if (isScheduleOk(bus)) { // running 3 tests on schedule and returns if successful
 		printf("\nThe schedule is ok!\n");
 		return 0;
@@ -143,11 +143,11 @@ void setDriversDriveOverLimit(int scheduleArr[][M], int overDriveDrivers[])
 	*/
 	int driversSeqArr[K][3] = { 0 };
 	int i, j, driverIndex;
-	for (i = 0; i < N; i++) { // iterating over schedule rows.
-		for (j = 0; j < M; j++) { // iterating over schedule cols.
-			driverIndex = scheduleArr[i][j]; // for readabilty.
+	for (i = 0; i < M; i++) { // iterating over schedule cols.
+		for (j = 0; j < N; j++) { // iterating over schedule rows.
+			driverIndex = scheduleArr[j][i]; // for readabilty.
 			if (driverIndex != 0)
-				setLongestSeqToArr(driversSeqArr[driverIndex - 1], j);
+				setLongestSeqToArr(driversSeqArr[driverIndex - 1], i);
 		}
 	}
 
@@ -172,11 +172,12 @@ void setLongestSeqToArr(int driverSeqArr[], int col)
 	curSeqCnt = &driverSeqArr[1];
 	lastSeen = &driverSeqArr[2];
 	if (*lastSeen == col - 1) { // if seq continues.
-		*lastSeen = col;
 		(*curSeqCnt)++;
 	}
-	else { // if seq breaks.
+	// exulding in calc the overlap drivers. 
+	else if (*lastSeen != col || *curSeqCnt == 0) { // if seq breaks or starts.
 		*longestSeq = (*longestSeq < *curSeqCnt) ? *curSeqCnt : *longestSeq;
 		*curSeqCnt = 1;
 	}
+	*lastSeen = col;
 }

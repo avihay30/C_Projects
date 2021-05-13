@@ -7,7 +7,7 @@ typedef struct fraction {
 	int denominator; // mehane
 } fraction;
 
-int getFractionsInput(fraction[]);
+int getFractionsInput(fraction*[]);
 void insertFractionToArr(fraction**, fraction*, int);
 void simplify(fraction[], int, fraction*);
 int gcd(int, int);
@@ -24,8 +24,12 @@ int main()
 		return 1;
 	}
 	printf("Enter fractions by pairs of integers(0 0 to finish):\n");
-	arrSize = getFractionsInput(userFractions);
+	arrSize = getFractionsInput(&userFractions);
 
+	if (arrSize == 0) {
+		printf("InputError: program ended without any calculation.\n");
+		return 1;
+	}
 	printFractions(userFractions, arrSize); // prints user input fractions.
 	simplify(userFractions, arrSize, &simplifiedFrac);
 	printSimplied(&simplifiedFrac);
@@ -34,19 +38,19 @@ int main()
 	return 0;
 }
 
-/* Function gets an empty array with size of 1,
+/* Function gets an address of empty array with size of 1,
    and realloc according to user inputs, until frac is (0/0) */
-int getFractionsInput(fraction fractionArr[])
+int getFractionsInput(fraction *fractionArr[])
 {
 	int arrSize = 0;
 	fraction frac; // temp fraction for testing user input before realloc.
 	while (1) {
 		if (arrSize > 0 && frac.denominator == 0) {
-			printf("\nYou can't divide by 0, please insert again...\n");
+			printf("\nZeroDivisionError: can't divide by 0, please insert again...\n");
 			arrSize--;
 		}
 		else if (arrSize > 0) { // inserting last inputted fraction.
-			insertFractionToArr(&fractionArr, &frac, arrSize - 1);
+			insertFractionToArr(fractionArr, &frac, arrSize - 1);
 		}
 		printf("%d (mone mehane): ", arrSize + 1);
 		// assume user input ints (noted in requirements).
@@ -123,7 +127,7 @@ void printSimplied(fraction *simplifiedFrac)
 	moduleNum = simplifiedFrac->numerator % simplifiedFrac->denominator;
 	// checking if possible to break it to int and (if needed) a fraction
 	if (intNum != 0)
-		printf("%d", intNum);
+		printf("%d\n", intNum);
 	if (moduleNum != 0)
-		printf("%s%d/%d", (intNum == 0) ? "" : " and ", moduleNum, simplifiedFrac->denominator);
+		printf("%s%d/%d\n", (intNum == 0) ? "" : " and ", moduleNum, simplifiedFrac->denominator);
 }

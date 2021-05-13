@@ -4,10 +4,10 @@
 #include <string.h>
 #include <math.h>
 
-#define SIZE_OF_CODE 10
+#define SIZE_OF_CODE 9
 
 typedef struct department {
-	char code[SIZE_OF_CODE + 1]; // + 1 for '\0'
+	char code[SIZE_OF_CODE + 1]; // size = 9 + 1(includes '\0')
 	char *name;
 	int soldItems;
 } department;
@@ -23,8 +23,8 @@ void switchAddress(department**, department**);
 void printDepartment(department* [], int, char*);
 
 #define N 3
-#define SIZE_OF_NAME 20
-#define STR_TEMP_SIZE 256
+#define SIZE_OF_NAME 19 // size = 19 [without '\0']
+#define STR_TEMP_SIZE 256 // exaggerated size of string for testing.
 
 int main()
 {
@@ -63,7 +63,7 @@ void inputToDepartmentArr(department depArr[], int size)
 			printf("\tEnter name: ");
 			gets(tempStr);
 		} while (!isStrInputOk(tempStr, SIZE_OF_NAME)); // checking if input longer than required
-		depArr[i].name = (char*)malloc(strlen(tempStr) + 1); // sizeOf(char) = 1
+		depArr[i].name = (char*)malloc(strlen(tempStr) + 1); // sizeOf(char) = 1, size + 1 for '\0'
 		if (depArr[i].name == NULL) {
 			printf("AllocationError: system couldn't allocate memory!");
 			freeAllNames(depArr, i);
@@ -78,7 +78,7 @@ void inputToDepartmentArr(department depArr[], int size)
 				depArr[i].soldItems = (int)dummyNum;
 				break;
 			}
-			printf("\tNot valid input, please enter a positive int number!\n");
+			printf("\tInvalid input, please enter a positive int number!\n");
 			printf("\t``````````````````````````````````````````\n");
 			rewind(stdin); // in case user inputs string.
 		}
@@ -88,12 +88,15 @@ void inputToDepartmentArr(department depArr[], int size)
 }
 
 
-/* Function checks wether the string is in required length */
+/* Function checks wether the string is in required length.
+   we assume an empty string is INVALID input. */
 int isStrInputOk(char *str, int maxSizeNeeded)
 {
-	if (strlen(str) > maxSizeNeeded) {
-		printf("\tToo long input max size required is: %d!\n", maxSizeNeeded);
-		printf("\t``````````````````````````````````````````\n");
+	char* mesg;
+	if (strlen(str) > maxSizeNeeded || strlen(str) == 0) {
+		mesg = (strlen(str) == 0) ? "Empty" : "Too long";
+		printf("\t%s input: max size required is: %d!\n", mesg ,maxSizeNeeded);
+		printf("\t`````````````````````````````````````````\n");
 		return FALSE;
 	}
 	return TRUE;
