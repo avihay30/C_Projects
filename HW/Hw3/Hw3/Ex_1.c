@@ -14,7 +14,7 @@ typedef struct student {
 	char* name;
 	long id;
 	float grade;
-	char hwGrades[NUM_OF_GRADES + 1]; // +1 for '\0'
+	char hwGrades[NUM_OF_GRADES + 1]; // +1 for '\0'.
 	char finalHwGrade;
 } student;
 
