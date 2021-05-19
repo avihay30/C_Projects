@@ -23,14 +23,13 @@ typedef struct university {
 	int numOfStudents;
 } university;
 
-void printUserMenu();
-void getChoice(int*);
-void uploadData(FILE**, university*);
+void printUserMenu(Bool);
+void getChoice(double*, int*);
 void checkFile(FILE*);
+void uploadData(FILE*, university*);
 Bool isStudentValid(student*, char*, char*);
-void freeAllChildren(university*);
+void freeAll(university*);
 void setHwGrade(student*);
-FILE* appendOutputFile(FILE**, int);
 double getAvgGrades(university*);
 void outputData(FILE*, university*);
 void printStudentInfo(FILE*, student*, int);
@@ -41,122 +40,107 @@ void outputAboveAvgStudents(FILE*, university*);
 int main()
 {
 	Bool isFirstRun = TRUE;
+	double dummyChoice = 0; // for tests in case user enters non int value.
 	int choice = 0;
-	FILE* f;
+	FILE* f = NULL;
 	university uni;
 
 	printf("Welcome User,\n");
 	while (choice != 6) {
-		if (isFirstRun) {
-			printf("\t**** On first run, choose option NO.1 ****\n");
-			f = fopen("output.txt", "wt"); // only creating new file.
-			checkFile(f);
-			fclose(f);
-		}
-		printUserMenu();
-		getChoice(&choice);
-		if (choice != 1 && isFirstRun) { // todo: check if 6 is valid at start..
+		printUserMenu(isFirstRun);
+		getChoice(&dummyChoice, &choice);
+		if (choice != 1 && isFirstRun) {
 			do {
 				printf("\tInvalid input! on first run choose option NO.1\n");
-				getChoice(&choice);
+				getChoice(&dummyChoice, &choice);
 			} while (choice != 1);
 		}
 		if (choice == 1 && !isFirstRun) {
 			do {
-				printf("\tInvalid input! You cannot choose option 1 twice.\n");
-				getChoice(&choice);
+				printf("\tInvalid input! You cannot choose option NO.1 *twice*.\n");
+				getChoice(&dummyChoice, &choice);
 			} while (choice == 1);
 		}
-		if (choice == 1 && isFirstRun) {
-			uploadData(&f, &uni);
-			isFirstRun = FALSE;
-			continue;
-		}
-		f = appendOutputFile(&f, choice);
+		if (choice != 1) // choice is in [2-5]
+			fprintf(f, "Option %d:\n``````````\n", choice);
 		switch (choice) {
-		/*case 1:
-			uploadData(&f, &uni);
+		case 1: // enter only if (choice == 1 and isFirstRun)
+			f = fopen("input.txt", "rt");
+			checkFile(f);
+			uploadData(f, &uni);
+			fclose(f);
 			isFirstRun = FALSE;
-			break; */
+			f = fopen("output.txt", "wt"); // only creating new file for outputs.
+			checkFile(f);
+			break;
 		case 2:
-			//f = appendOutputFile(&f, choice);
 			outputData(f, &uni);
-			//fclose(f);
 			break;
 		case 3:
-			//f = appendOutputFile(&f, choice);
 			outputFinalGrades(f, &uni);
-			//fclose(f);
 			break;
 		case 4:
-			//f = appendOutputFile(&f, choice);
 			outputStatistics(f, &uni);
-			//fclose(f);
 			break;
 		case 5:
-			//f = appendOutputFile(&f, choice);
 			outputAboveAvgStudents(f, &uni);
-			//fclose(f);
 			break;
 		case 6:
-			//f = appendOutputFile(&f, choice);
 			fprintf(f, "End Of Program");
-			//fclose(f);
 			break;
 		}
-		fclose(f);
 	}
-	printf("Goodbay!\n");
-	freeAllChildren(&uni);
-	free(uni.students);
+	printf("^^^\\> Goodbay! </^^^\n");
+	printf("`````````````````````\n");
+	fclose(f);
+	freeAll(&uni);
 	return 0;
 }
 
-void printUserMenu()
+void printUserMenu(Bool isFirstRun)
 {
+	if (isFirstRun)
+		printf("\t**** On first run, choose option NO.1 ****\n");
 	printf("\tPlease choose an action:\n");
-	printf("\t-> 1: Upload data from 'input.txt' file.\n");
+	printf("\t-> 1: %sUpload data from 'input.txt' file.\n", !isFirstRun ? "[DISABLED] " : "");
 	printf("\t-> 2: Output student's data.\n");
 	printf("\t-> 3: Calculate final grades.\n");
-	printf("\t-> 4: Calculate statisticts data.\n");
+	printf("\t-> 4: Calculate statistics data.\n");
 	printf("\t-> 5: Output only above average students.\n");
 	printf("\t-> 6: End program.\n");
 	printf("\t(*NOTE: 2<->5 will be output into 'output.txt' file)\n");
 	printf("\t```````````````````````````````````````````````````````\n");
 }
 
-void getChoice(int *choice)
+void getChoice(double *fchoice, int *choice)
 {
 	printf("\tYour choice: ");
 	while (TRUE) {
-		if (scanf("%d", choice) && (*choice > 0 && *choice < 7))
+		if (scanf("%lf", fchoice) && floor(*fchoice) == ceil(*fchoice) && (*fchoice > 0.0 && *fchoice < 7.0)) {
+			*choice = (int)*fchoice; // fchoice is an 'int', like 2.0
 			break;
-		printf("\tInvalid input! please enter int between 1<->6: "); // logical else
+		}
+		printf("\tInvalid input! please enter *int* between 1<->6: "); // logical else
 		rewind(stdin); // in case user inputs string.
 	}
 	puts("\n");
 }
 
-void uploadData(FILE** inputFile, university* uni)
+void uploadData(FILE* inputFile, university* uni)
 {
 	int i = 0, numOfInputs = 0;
 	char tempName[100], tempGrades[50];
 	student tmpStudent, *tempStudents;
 
-	*inputFile = fopen("input.txt", "rt");
-	checkFile(*inputFile);
-
-	while ((numOfInputs = fscanf(*inputFile, "%s %d %f %s", tempName, &tmpStudent.id, &tmpStudent.grade, &tempGrades)) != EOF) {
+	while ((numOfInputs = fscanf(inputFile, "%s %d %f %s", tempName, &tmpStudent.id, &tmpStudent.grade, &tempGrades)) != EOF) {
 		if (numOfInputs != 4 || !isStudentValid(&tmpStudent, tempName, tempGrades)) {
 			printf("Read-File Error: the input file isn't valid!!\n");
-			if (i > 0) {
-				freeAllChildren(uni);
-				free(uni->students);
-			}
+			if (i > 0)
+				freeAll(uni);
 			exit(1);
 		}
 
-		if (i == 0) {
+		if (i == 0) { // doing malloc only if file isn't empty.
 			uni->students = (student*)malloc(sizeof(student));
 			if (uni->students == NULL) {
 				printf("%s\n", ALLOC_ERR);
@@ -167,8 +151,7 @@ void uploadData(FILE** inputFile, university* uni)
 			tempStudents = (student*)realloc(uni->students, (i + 1) * sizeof(student));
 			if (tempStudents == NULL) {
 				printf("%s\n", ALLOC_ERR);
-				freeAllChildren(uni);
-				free(uni->students);
+				freeAll(uni);
 				exit(1);
 			}
 			uni->students = tempStudents;
@@ -177,8 +160,9 @@ void uploadData(FILE** inputFile, university* uni)
 		if (uni->students[i].name == NULL) {
 			printf("%s\n", ALLOC_ERR);
 			if (i > 0) // already done malloc for names.
-				freeAllChildren(uni);
-			free(uni->students);
+				freeAll(uni);
+			else
+				free(uni->students);
 			exit(1);
 		}
 
@@ -189,7 +173,6 @@ void uploadData(FILE** inputFile, university* uni)
 		setHwGrade(&uni->students[i]);
 		i++;
 	}
-	fclose(*inputFile);
 	if (i == 0) {
 		printf("Read-File Error: The input file is empty!!\n");
 		exit(1);
@@ -201,7 +184,7 @@ void checkFile(FILE* f)
 {
 	if (f == NULL) {
 		printf("%s\n", FILE_ERR);
-		exit(1); // closes file automaticly
+		exit(1); // closes file automaticaly
 	}
 }
 
@@ -221,11 +204,12 @@ Bool isStudentValid(student* stud, char* name, char* grades)
 	return TRUE; // logical else
 }
 
-void freeAllChildren(university* uni)
+void freeAll(university* uni)
 {
 	int i;
 	for (i = 0; i < uni->numOfStudents; i++)
 		free(uni->students[i].name);
+	free(uni->students);
 }
 
 void setHwGrade(student* student)
@@ -238,15 +222,6 @@ void setHwGrade(student* student)
 		}
 	}
 	student->finalHwGrade = '0';
-}
-
-FILE* appendOutputFile(FILE** outputFile, int option)
-{
-	*outputFile = fopen("output.txt", "at");
-	checkFile(*outputFile);
-	fprintf(*outputFile, "Option %d:\n", option);
-	fprintf(*outputFile, "``````````\n");
-	return *outputFile;
 }
 
 double getAvgGrades(university* uni)
@@ -263,7 +238,7 @@ double getAvgGrades(university* uni)
 void outputData(FILE* outputFile, university* uni)
 {
 	int i;
-	student *stud; // for readablity
+	student *stud; // for readability
 
 	for (i = 0; i < uni->numOfStudents; i++) {
 		stud = &(uni->students[i]);
@@ -283,7 +258,7 @@ void outputFinalGrades(FILE* outputFile, university* uni)
 {
 	int i;
 	double finalGrade;
-	student* stud; // for readablity
+	student* stud; // for readability
 	fprintf(outputFile, "BEFORE:\n");
 	outputData(outputFile, uni);
 	fprintf(outputFile, "AFTER:\n");
@@ -306,7 +281,7 @@ void outputStatistics(FILE* outputFile, university* uni)
 {
 	int i;
 	double avg, sd = 0;
-	student* stud = uni->students; // for readablity
+	student* stud = uni->students; // for readability
 	float minGrade = stud->grade, maxGrade = stud->grade;
 
 	avg = getAvgGrades(uni);
