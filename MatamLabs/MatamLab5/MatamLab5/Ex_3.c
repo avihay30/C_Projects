@@ -3,7 +3,7 @@
 #include <string.h>
 
 void replaceSubstring(char*, char*);
-int* getIndexesOfSubs(char*, char*);
+void getIndexesOfSubs(int*, char*, char*);
 void removeEnter(char*);
 
 #define STR_MAX_LEN 100
@@ -38,9 +38,9 @@ int main()
    "substr" is substring of "str". */
 void replaceSubstring(char *str, char *substr)
 {
-	int i, j, curIndex, *arrOfIndexes;
+	int i, j, curIndex, arrOfIndexes[STR_MAX_LEN + 1] = { 0 };
 	// getting all start indexes of occurrences of substr in str.
-	arrOfIndexes = getIndexesOfSubs(str, substr);
+	getIndexesOfSubs(arrOfIndexes, str, substr);
 	for (i = 0; arrOfIndexes[i] != -1; i++) {
 		for (j = 0; j < strlen(substr); j++) {
 			curIndex = arrOfIndexes[i] + j;
@@ -54,11 +54,10 @@ void replaceSubstring(char *str, char *substr)
 /* Function gets two string and returns 
    all start indexes of occurrences of substr in str. 
    The returned array ends with the element of -1. */
-int* getIndexesOfSubs(char *str, char *substr)
+void getIndexesOfSubs(int* arr, char *str, char *substr)
 {
 	/* the worst case possible of size (e.x: "aaaa" with sub "a" -> size=4).
 	   the plus one because the last element will hold -1. */ 
-	int arr[STR_MAX_LEN + 1] = {0};
 	int indexOfArr = 0, indexOfStr = 0;
 	// declaring a pointer that will hold the address of one occurrence at a time.
 	char* pOfFirstShow;
@@ -76,7 +75,6 @@ int* getIndexesOfSubs(char *str, char *substr)
 	/* adding -1 to the end of array in order to 
 	   know when to stop itereting in main function (-1 is not a valid index) */
 	arr[indexOfArr] = -1; 
-	return arr;
 }
 /* Function gets string and if last char in string is '\n'
    replacing it with proper ending '\0'. */
