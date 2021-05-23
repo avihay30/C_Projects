@@ -7,6 +7,7 @@
 #define NUM_OF_GRADES 5
 #define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!"
 #define FILE_ERR "FileError: The program couldn't create/read file!"
+#define FILE_READ_ERR "Read-File Error: the input file is empty or invalid!!"
 
 typedef enum { FALSE, TRUE } Bool;
 
@@ -134,17 +135,13 @@ void uploadData(FILE* inputFile, university* uni)
 	student tmpStudent, *tempStudents;
 
 	while ((numOfInputs = fscanf(inputFile, "%s %d %f %s", tempName, &tmpStudent.id, &tmpStudent.grade, &tempGrades)) != EOF) {
-		if (numOfInputs != 4 || !isStudentValid(&tmpStudent, tempName, tempGrades)) {
-			printf("Read-File Error: the input file isn't valid!!\n");
-			freeAll(uni);
-			exit(1);
-		}
+		if (numOfInputs != 4 || !isStudentValid(&tmpStudent, tempName, tempGrades))
+			checkAllocation(NULL, FILE_READ_ERR, uni);
 
 		if (i == 0) { // doing malloc only if file isn't empty.
 			uni->students = (student*)malloc(sizeof(student));
 			checkAllocation(uni->students, ALLOC_ERR, uni);
-		}
-		else {
+		} else {
 			tempStudents = (student*)realloc(uni->students, (i + 1) * sizeof(student));
 			checkAllocation(tempStudents, ALLOC_ERR, uni);
 			uni->students = tempStudents;
@@ -160,7 +157,7 @@ void uploadData(FILE* inputFile, university* uni)
 		uni->numOfStudents = ++i; // incriment before assaingment
 	}
 	if (i == 0) {
-		printf("Read-File Error: The input file is empty!!\n");
+		fprintf(stderr, "%s\n", FILE_READ_ERR);
 		exit(1);
 	}
 }
@@ -168,7 +165,7 @@ void uploadData(FILE* inputFile, university* uni)
 void checkAllocation(void *pToCheck, char *message, university *uni)
 {
 	if (pToCheck == NULL) {
-		printf("%s\n", message);
+		fprintf(stderr, "%s\n", message);
 		freeAll(uni);
 		exit(1); // closes file automaticaly
 	}
