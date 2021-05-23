@@ -21,11 +21,11 @@ int main()
 				if ((i + 1) % 5 == 0) // printing maximum 5 elements in a row.
 					printf("\n");
 			}
+			free(arr);
 			printf("\nThe sum of the sequence elements is: %lf\n\n", sum);
 		}
 	} while (n > 0);
 	printf("\nThank you for exploring arithmetic sequences and dynamic allocations of arrays.\n");
-	free(arr);
 
 	return 0;
 }
