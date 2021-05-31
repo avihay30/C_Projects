@@ -29,6 +29,8 @@ int main()
 	return 0;
 }
 
+/* Function gets an unsigned char and
+   returns the unsigned char with its most significant bit as '1' */
 unsigned char check_ms(unsigned char ch)
 {
 	int n = 8 * sizeof(unsigned char);
@@ -36,6 +38,8 @@ unsigned char check_ms(unsigned char ch)
 	return ch | (unity << (n-1));
 }
 
+/* Function gets an unsigned char and a certain Bit that the user wanted to change.
+   return the unsigned char with the certain Bit changed */
 unsigned char change_bit(unsigned char ch, int bit)
 {
 	int n = 8 * sizeof(unsigned char);
@@ -47,6 +51,9 @@ unsigned char change_bit(unsigned char ch, int bit)
 	return ch | unity; // logical else
 }
 
+
+/* Function gets an unsigned char, 
+   prints the binary presentation of the unsigned char */
 void BinPrint(unsigned char ch)
 {
 	int n = 8 * sizeof(unsigned char);

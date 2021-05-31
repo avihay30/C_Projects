@@ -58,17 +58,21 @@ void Error_Msg(char* str)
 	exit(1);
 }
 
+/* Function gets a pointer to a 'Book' and pointer of a FILE
+   assign to the book a code and a name */
 void input_book(Book* B, FILE* in)
 {
 	char tempName[MAX];
 	fscanf(in, "%s", B->code);
 	fscanf(in, "%s", tempName);
 	B->name = (char*)malloc(strlen(tempName) + 1); // sizeof(char) = 1
-	if (B->name == NULL)
-		return;
+	if (B->name == NULL) /* if the Name is NULL */
+		return; /* return to 'input_library' */
 	strcpy(B->name, tempName); // logical else.
 }
 
+/* Function gets a pointer of a Library and the pointer of a FILE and
+   Fills the Library with the books using 'input_book' */
 void input_library(Library* L, FILE* in)
 {
 	int i, j;
@@ -77,20 +81,25 @@ void input_library(Library* L, FILE* in)
 	L->books = (Book*)malloc(L->numOfBooks * sizeof(Book));
 	if (L->books == NULL)
 		Error_Msg("Allocation Error!");
-	for (i = 0; i < L->numOfBooks; i++) {
+	for (i = 0; i < L->numOfBooks; i++)
 		input_book(&(L->books[i]), in);
-		if (L->books[i].name == NULL) {
+		// incase the current books name is NULL
+		if (L->books[i].name == NULL)
+		{
 			for (j = 0; j < i; j++)
+			{
 				free(L->books[j].name);
+			}
 			free(L->books);
 			Error_Msg("Allocation Error!");
 		}
-	}
 }
+
 void output_book(Book* B, FILE* out)
 {
 	fprintf(out, "%-8s %s\n", B->code, B->name);
 }
+
 void output_library(Library* L, FILE* out)
 {
 	int i;

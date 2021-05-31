@@ -26,7 +26,7 @@ int main()
 			printStudentsToFile(out, name, avg);
 		}
 		else // skip unwonted text.
-			fseek(in, 6, SEEK_CUR); // 8 represents the amount of bytes to skip.
+			fseek(in, 6, SEEK_CUR); // 6 represents the amount of bytes to skip.
 	}
 
 	fclose(in);

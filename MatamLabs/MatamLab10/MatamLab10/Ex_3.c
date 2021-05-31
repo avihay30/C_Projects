@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-//int getBit(unsigned int, int);
 int Bit_Count(unsigned int x);
 void Bin_Print(unsigned int x);
 
@@ -19,18 +18,12 @@ int main()
     return 0;
 }
 
-/* int getBit(unsigned int number, int bit)
-{
-	unsigned int unity = 1, res;
-	res = number & (unity << bit);
-	return (res != 0);
-} */
-
+/* Function gets an unsigned int, returns the amount of 'turned on' Bits => '1' */
 int Bit_Count(unsigned int x)
  {
 	int n = 8 * sizeof(unsigned int);
 	int i, cnt = 0;
-	unsigned int unity, res;
+	unsigned int unity = 1, res;
 	for (i = 0; i < n; i++) {
 		res = x & (unity << i);
 		cnt += (res != 0);
