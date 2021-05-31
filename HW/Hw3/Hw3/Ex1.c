@@ -31,9 +31,9 @@ void uploadData(FILE*, university*);
 Bool isStudentValid(student*, char*, char*);
 void freeAll(university*);
 void setHwGrade(student*);
-double getAvgGrades(university*);
 void outputData(FILE*, university*);
 void outputFinalGrades(FILE*, university*);
+double getAvgGrades(university*);
 void outputStatistics(FILE*, university*);
 void outputAboveAvgStudents(FILE*, university*);
 
@@ -41,7 +41,7 @@ int main()
 {
 	Bool isFirstRun = TRUE;
 	double dummyChoice = 0; // for tests in case user enters non int value.
-	int choice = 0;
+	int choice = 0; // will hold the real choice.
 	FILE* f = NULL;
 	university uni;
 	uni.students = NULL; // setting values of uni to default values.
@@ -49,30 +49,30 @@ int main()
 
 	printf("Welcome User,\n");
 	while (choice != 6) {
-		printUserMenu(isFirstRun);
-		getChoice(&dummyChoice, &choice);
+		printUserMenu(isFirstRun); // prints menu.
+		getChoice(&dummyChoice, &choice); // get choice and checks it's validation.
 		if (choice != 1 && isFirstRun) {
 			do {
 				printf("\tInvalid input! on first run choose option NO.1\n");
-				getChoice(&dummyChoice, &choice);
+				getChoice(&dummyChoice, &choice); // ask user for new valid input.
 			} while (choice != 1);
 		}
 		if (choice == 1 && !isFirstRun) {
 			do {
 				printf("\tInvalid input! You cannot choose option NO.1 *twice*.\n");
-				getChoice(&dummyChoice, &choice);
+				getChoice(&dummyChoice, &choice); // ask user for new valid input.
 			} while (choice == 1);
 		}
 		if (choice != 1) // choice is in [2-5]
 			fprintf(f, "Option %d:\n``````````\n", choice);
 		switch (choice) {
-		case 1: // enter only if (choice == 1 and isFirstRun)
+		case 1: // enters only if (choice == 1 and isFirstRun)
 			f = fopen("input.txt", "rt");
 			checkAllocation(f, FILE_ERR, &uni);
 			uploadData(f, &uni);
 			fclose(f);
 			isFirstRun = FALSE;
-			f = fopen("output.txt", "wt"); // only creating new file for outputs.
+			f = fopen("output.txt", "wt"); // creating new file for future outputs.
 			checkAllocation(f, FILE_ERR, &uni);
 			break;
 		case 2:
@@ -96,9 +96,11 @@ int main()
 	printf("`````````````````````\n");
 	fclose(f);
 	freeAll(&uni);
+	PrintMemoryLeaks();
 	return 0;
 }
 
+// Function prints all availble user inputs.
 void printUserMenu(Bool isFirstRun)
 {
 	if (isFirstRun)
@@ -114,12 +116,15 @@ void printUserMenu(Bool isFirstRun)
 	printf("\t```````````````````````````````````````````````````````\n");
 }
 
+/* Function gets a dummyChoice(float pointer) and int pointer
+   and cast the float pointer to int only if user inputted a valid input.*/
 void getChoice(double *fchoice, int *choice)
 {
 	printf("\tYour choice: ");
 	while (TRUE) {
+		// getting input and checking if it's int(by floor and ceil) and it's boundaries[0,6].
 		if (scanf("%lf", fchoice) && floor(*fchoice) == ceil(*fchoice) && (*fchoice > 0.0 && *fchoice < 7.0)) {
-			*choice = (int)*fchoice; // fchoice is an 'int', like 2.0
+			*choice = (int)*fchoice; // user entered int (fchoice is an 'int', like 2.0).
 			break;
 		}
 		printf("\tInvalid input! please enter *int* between 1<->6: "); // logical else
@@ -128,17 +133,22 @@ void getChoice(double *fchoice, int *choice)
 	puts("\n");
 }
 
+/* Function gets pointer to a file and an a pointer to an empty university,
+   and reads the data from file and assing it to the university. */
 void uploadData(FILE* inputFile, university* uni)
 {
 	int i = 0, numOfInputs = 0;
-	char tempName[100], tempGrades[50];
-	student tmpStudent, *tempStudents;
+	char tempName[256], tempGrades[50]; // dummy strings for testing.
+	student tmpStudent, *tempStudents; // dummy pointers for testing.
 
+	// looping until file ended.
 	while ((numOfInputs = fscanf(inputFile, "%s %d %f %s", tempName, &tmpStudent.id, &tmpStudent.grade, &tempGrades)) != EOF) {
+		// checking if file is invalid
 		if (numOfInputs != 4 || !isStudentValid(&tmpStudent, tempName, tempGrades))
+			// passing to function NULL on perpose to free all memory if need and exit.
 			checkAllocation(NULL, FILE_READ_ERR, uni);
 
-		if (i == 0) { // doing malloc only if file isn't empty.
+		if (i == 0) { // doing malloc only if file isn't empty and valid.
 			uni->students = (student*)malloc(sizeof(student));
 			checkAllocation(uni->students, ALLOC_ERR, uni);
 		} else {
@@ -149,19 +159,21 @@ void uploadData(FILE* inputFile, university* uni)
 		uni->students[i].name = (char*)malloc(strlen(tempName) + 1); // sizeOf(char) = 1
 		checkAllocation(uni->students[i].name, ALLOC_ERR, uni);
 
+		// filling student data.
 		strcpy(uni->students[i].name, tempName);
 		uni->students[i].id = tmpStudent.id;
 		uni->students[i].grade = tmpStudent.grade;
 		strcpy(uni->students[i].hwGrades, tempGrades);
 		setHwGrade(&uni->students[i]);
-		uni->numOfStudents = ++i; // incriment before assaingment
+		uni->numOfStudents = ++i; // increment before assignment
 	}
-	if (i == 0) {
+	if (i == 0) { // if whole file is empty.
 		fprintf(stderr, "%s\n", FILE_READ_ERR);
 		exit(1);
 	}
 }
 
+// Function checks if pointer allocation is invalid and free memory needed and exit. 
 void checkAllocation(void *pToCheck, char *message, university *uni)
 {
 	if (pToCheck == NULL) {
@@ -170,7 +182,8 @@ void checkAllocation(void *pToCheck, char *message, university *uni)
 		exit(1); // closes file automaticaly
 	}
 }
-
+/* Function gets a temp student struct and dummy name and grades
+   and checks whether the student is valid. */
 Bool isStudentValid(student* stud, char* name, char* grades)
 {
 	int i;
@@ -187,6 +200,7 @@ Bool isStudentValid(student* stud, char* name, char* grades)
 	return TRUE; // logical else
 }
 
+// Function gets an pointer and free all allocated memory.
 void freeAll(university* uni)
 {
 	int i;
@@ -197,10 +211,13 @@ void freeAll(university* uni)
 	free(uni->students);
 }
 
+/* Function gets a student and calculates 
+   and assing the final grade of Hw to student. */
 void setHwGrade(student* student)
 {
 	int i, cnt = 0;
 	for (i = 0; i < NUM_OF_GRADES; i++) {
+		// checking if grade == '1' -> increment before assignment cnt.
 		if (student->hwGrades[i] == '1' && ++cnt == 3) {
 			student->finalHwGrade = '1';
 			return;
@@ -209,6 +226,50 @@ void setHwGrade(student* student)
 	student->finalHwGrade = '0';
 }
 
+/* Function gets a file pointer and filled university pointer 
+   and write the university to the file */
+void outputData(FILE* outputFile, university* uni)
+{
+	int i;
+	student *stud = uni->students; // for readability
+
+	for (i = 0; i < uni->numOfStudents; i++, stud++) { // increment pointer of stud.
+		// printing student to file.
+		fprintf(outputFile, "Student %d: %s", i + 1, stud->name);
+		fprintf(outputFile, " %d %.2f %c", stud->id, stud->grade, stud->finalHwGrade);
+		fputc('\n', outputFile);
+	}
+	fputc('\n', outputFile);
+}
+
+/* Function gets a file pointer and filled university pointer
+   and write the university to the file and the final grades of each student. */
+void outputFinalGrades(FILE* outputFile, university* uni)
+{
+	int i;
+	double finalGrade;
+	student* stud = uni->students; // for readability
+	fprintf(outputFile, "BEFORE:\n");
+	outputData(outputFile, uni);
+	fprintf(outputFile, "AFTER:\n");
+	for (i = 0; i < uni->numOfStudents; i++, stud++) { // increment pointer of stud.
+		// calculating final grade.
+		if (stud->grade < 55)
+			finalGrade = stud->grade;
+		else {
+			finalGrade = stud->grade * 0.85;
+			if (stud->finalHwGrade == '1')
+				finalGrade += 15;
+		}
+		// printing student to file.
+		fprintf(outputFile, "Student %d: %s", i + 1, stud->name);
+		fprintf(outputFile, " %d %.2f %c", stud->id, stud->grade, stud->finalHwGrade);
+		fprintf(outputFile, " final: %.2lf\n", finalGrade);
+	}
+	fputc('\n', outputFile);
+}
+
+/* Function gets a university pointer and calcs avg of students. */
 double getAvgGrades(university* uni)
 {
 	int i;
@@ -220,42 +281,8 @@ double getAvgGrades(university* uni)
 	return avg;
 }
 
-void outputData(FILE* outputFile, university* uni)
-{
-	int i;
-	student *stud = uni->students; // for readability
-
-	for (i = 0; i < uni->numOfStudents; i++, stud++) {
-		fprintf(outputFile, "Student %d: %s", i + 1, stud->name);
-		fprintf(outputFile, " %d %.2f %c", stud->id, stud->grade, stud->finalHwGrade);
-		fputc('\n', outputFile);
-	}
-	fputc('\n', outputFile);
-}
-
-void outputFinalGrades(FILE* outputFile, university* uni)
-{
-	int i;
-	double finalGrade;
-	student* stud = uni->students; // for readability
-	fprintf(outputFile, "BEFORE:\n");
-	outputData(outputFile, uni);
-	fprintf(outputFile, "AFTER:\n");
-	for (i = 0; i < uni->numOfStudents; i++, stud++) {
-		if (stud->grade < 55)
-			finalGrade = stud->grade;
-		else {
-			finalGrade = stud->grade * 0.85;
-			if (stud->finalHwGrade == '1')
-				finalGrade += 15;
-		}
-		fprintf(outputFile, "Student %d: %s", i + 1, stud->name);
-		fprintf(outputFile, " %d %.2f %c", stud->id, stud->grade, stud->finalHwGrade);
-		fprintf(outputFile, " final: %.2lf\n", finalGrade);
-	}
-	fputc('\n', outputFile);
-}
-
+/* Function gets a file pointer and filled university pointer
+   and write the statistics of the students to the file */
 void outputStatistics(FILE* outputFile, university* uni)
 {
 	int i;
@@ -264,24 +291,27 @@ void outputStatistics(FILE* outputFile, university* uni)
 	float minGrade = stud->grade, maxGrade = stud->grade;
 
 	avg = getAvgGrades(uni);
-	for (i = 0; i < uni->numOfStudents; i++, stud++) {
-		sd += pow(stud->grade - avg, 2.0); // calc Standard Deviation
+	for (i = 0; i < uni->numOfStudents; i++, stud++) { // increment pointer of stud.
+		sd += pow(stud->grade - avg, 2.0); // calc beneath sqrt in Standard Deviation
 		minGrade = (minGrade > stud->grade) ? stud->grade : minGrade;
 		maxGrade = (maxGrade < stud->grade) ? stud->grade : maxGrade;
 	}
 	sd = sqrt(sd / uni->numOfStudents);
 
+	// printing results to file.
 	fprintf(outputFile, "Average: %.2lf\n", avg);
 	fprintf(outputFile, "Standard Deviation: %.2lf\n", sd);
 	fprintf(outputFile, "Number of students: %d\n", uni->numOfStudents);
 	fprintf(outputFile, "Range: %.2lf - %.2lf\n\n", maxGrade, minGrade);
 }
 
+/* Function gets a file pointer and filled university pointer
+   and write the above average students[name, id] to the file */
 void outputAboveAvgStudents(FILE* outputFile, university* uni)
 {
 	int i;
 	double avg;
-	avg = getAvgGrades(uni);
+	avg = getAvgGrades(uni); // avg of all students.
 
 	for (i = 0; i < uni->numOfStudents; i++)
 		if (uni->students[i].grade > avg)
