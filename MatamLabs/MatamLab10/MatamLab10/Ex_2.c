@@ -81,7 +81,7 @@ void input_library(Library* L, FILE* in)
 	L->books = (Book*)malloc(L->numOfBooks * sizeof(Book));
 	if (L->books == NULL)
 		Error_Msg("Allocation Error!");
-	for (i = 0; i < L->numOfBooks; i++)
+	for (i = 0; i < L->numOfBooks; i++) {
 		input_book(&(L->books[i]), in);
 		// incase the current books name is NULL
 		if (L->books[i].name == NULL)
@@ -93,6 +93,7 @@ void input_library(Library* L, FILE* in)
 			free(L->books);
 			Error_Msg("Allocation Error!");
 		}
+	}
 }
 
 void output_book(Book* B, FILE* out)
