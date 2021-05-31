@@ -96,7 +96,6 @@ int main()
 	printf("`````````````````````\n");
 	fclose(f);
 	freeAll(&uni);
-	PrintMemoryLeaks();
 	return 0;
 }
 
