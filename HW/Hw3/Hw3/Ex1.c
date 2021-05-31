@@ -222,7 +222,7 @@ void setHwGrade(student* student)
 			return;
 		}
 	}
-	student->finalHwGrade = '0';
+	student->finalHwGrade = '0'; // logical else.
 }
 
 /* Function gets a file pointer and filled university pointer 
