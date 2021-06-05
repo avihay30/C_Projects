@@ -1,17 +1,17 @@
 #include "Restaurant.h"
 
 // Function checks if pointer allocation is invalid and free memory needed and exit. 
-void checkAllocation(void* pToCheck, char* message, pList productsList)
+void checkAllocation(void* pToCheck, char* message, void* listToFree, void(*fp)(void*))
 {
 	if (pToCheck == NULL) {
 		fprintf(stderr, "%s\n", message);
-		freeAll(productsList);
+		fp(listToFree);
 		exit(1); // closes file automaticaly
 	}
 }
 
-// Function gets an pointer and free all allocated memory.
-void freeAll(pList prodList)
+// Function gets an pointer and free all allocated memory of kitchen.
+void freeKitchen(pList prodList)
 {
 	pProduct tempP;
 	while (prodList->head != NULL) {
@@ -22,16 +22,32 @@ void freeAll(pList prodList)
 	}
 }
 
-Bool isProductValid(char* name, float quantity, float price)
+void freeAll(pRestaurant rest)
 {
-	if (strlen(name) == 0 || strlen(name) > MAX_NAME_SIZE) // checking name
-		return FALSE;
-	if (quantity < 0.0 || floor(quantity) != ceil(quantity)) // if negative or not int.
-		return FALSE;
-	if (price < 0.0 || floor(price) != ceil(price)) // if negative or not int.
-		return FALSE;
+	pOrders tables = rest->tables;
+	int i;
+	pOrder tempP;
+	for (i = 0; i < NUMBER_OF_TABLES; i++) {
+		while (tables[i].head != NULL) {
+			tempP = tables[i].head;
+			tables[i].head = tables[i].head->next;
+			free(tempP);
+		}
+		tables[i].head = NULL;
+	}
+	freeKitchen(&(rest->kitchen));
+}
 
-	return TRUE; // logical else
+Bool isProductNameValid(char* name) {
+	if (strlen(name) == 0 || strlen(name) > MAX_NAME_SIZE)
+		return FALSE;
+	return TRUE;
+}
+
+Bool isIntPositive(float floatToCheck) {
+	if (floatToCheck < 0.0 || floor(floatToCheck) != ceil(floatToCheck)) // if negative or not int.
+		return FALSE;
+	return TRUE;
 }
 
 Bool isOperationValid(float op)
@@ -42,14 +58,23 @@ Bool isOperationValid(float op)
 	return TRUE; // logical else
 }
 
-/* Function checks if a name exits in list,
-   if true free all memory and output error message and exits */
-void checkName(pList prodList, char* name)
+Bool checkTableNumber(float tableNumber)
 {
-	pProduct head = prodList->head;
-	while (head != NULL) {
-		if (strcmp(head->ProductName, name) == 0)
-			checkAllocation(NULL, NAME_DUPL_ERR, prodList);
-		head = head->next;
+	if (tableNumber < 0.0 || tableNumber > NUMBER_OF_TABLES || floor(tableNumber) != ceil(tableNumber))
+		return FALSE;
+	return TRUE;
+}
+
+/* Function checks if a name exists in list,
+   if true returns the pointer to the product, if false returns NULL. */
+pProduct getProductPtr(pList kitchen, char* productName)
+{
+	pProduct temp = kitchen->head;
+	//checking for dish's instance in the kitchen
+	while (temp != NULL) {
+		if (!strcmp(temp->ProductName, productName))
+			return temp;
+		temp = temp->next;
 	}
+	return NULL;
 }

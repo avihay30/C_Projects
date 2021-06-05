@@ -7,20 +7,21 @@
 #include <string.h>
 #include <math.h>
 
-#define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!"
-#define FILE_ERR "FileError: The program couldn't create/read file!"
-#define FILE_READ_ERR "Read-File Error: the input file is empty or invalid!!"
-#define INSTRUCTIONS_ERR "Read-File Error: the instructions file is empty or invalid!!"
-#define NAME_DUPL_ERR "Read-File Error: the Mantot file has duplicte product name!!"
+#define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!\n"
+#define FILE_ERR "FileError: The program couldn't create/read file!\n"
+#define FILE_READ_ERR "Read-File Error: the input file is empty or invalid!!\n"
+#define INSTRUCTIONS_ERR "Read-File Error: the instructions file is empty or invalid!!\n"
+#define NAME_DUPL_ERR "Read-File Error: the Mantot file has duplicte %s product!!\n"
+#define INVALID_TABLE_NUM "Invalid table number!\n"
 #define NUMBER_OF_TABLES 50
 #define MAX_NAME_SIZE 50
-#define KITCHEN_CREATED "The kitchen was created"
-#define ADD_TO_KITCHEN "%d %s were added to the kitchen" // %d- NO. prod, %s- prod name
-#define PRODUCT_UNAVILEBLE "We don’t have %s, sorry!" // %s- prod name
-#define ADD_TO_TABLE "%d %s were added to the table number %d" // %d- NO. prod, %s- prod name, %d- NO. table
-#define PRODUCT_RETURNED "%d %s was returned to the kitchen from table number %d" // %d- NO. prod, %s- prod name, %d- NO. table
-#define TABLE_DIDNT_ORDERD "The table number %d is not ordered yet" // %d NO. table
-#define PRICE "%d %s. %d nis+%d nis for tips, please!" // %d- NO. prod, %s- prod name, %d- total price, %d- tip
+#define KITCHEN_CREATED "The kitchen was created\n"
+#define ADD_TO_KITCHEN "%d %s were added to the kitchen\n" // %d- NO. prod, %s- prod name
+#define PRODUCT_UNAVILEBLE "We don`t have %s, sorry!\n" // %s- prod name
+#define ADD_TO_TABLE "%d %s were added to the table number %d\n" // %d- NO. prod, %s- prod name, %d- NO. table
+#define PRODUCT_RETURNED "%d %s was returned to the kitchen from table number %d\n" // %d- NO. prod, %s- prod name, %d- NO. table
+#define TABLE_DIDNT_ORDERD "The table number %d is not ordered yet\n" // %d NO. table
+#define PRICE "%d nis + %d nis for tips, please!\n" // %d- total price, %d- tip
 
 typedef enum { FALSE, TRUE } Bool;
 
@@ -31,27 +32,47 @@ typedef struct product
 	int Price; // positive definit
 	int Quantity; // positive definit
 	struct product* next;
-} product, *pProduct;
+}product, *pProduct;
 
 typedef struct list
 {
 	pProduct head;
 	pProduct tail;
-	int size;
 }list, *pList;
 
+// define order(node) struct
+typedef struct order
+{
+	pProduct product; // no duplicates
+	int Quantity; // positive definit
+	struct order* next;
+}order, *pOrder;
+
+typedef struct orders
+{
+	pOrder head;
+	Bool isCanceledOrder;
+}orders, *pOrders;
+
+typedef struct restaurant
+{
+	list kitchen;
+	orders tables[NUMBER_OF_TABLES];
+}restaurant, *pRestaurant;
 
 void CreateProducts(pList);
-void AddItems(char*, int);
-void OrderItem(int, char*, int);
-void RemoveItem(int);
-void RemoveTable(int);
+void AddItems(pList, char*, float);
+void OrderItem(pRestaurant, float, char*, float);
+void RemoveItem(orders[], float);
+void RemoveTable(orders[], float);
 
-void checkAllocation(void*, char*, pList);
-void freeAll(pList);
-Bool isProductValid(char*, float, float);
+Bool checkTableNumber(float);
+void checkAllocation(void*, char*,void* ,void(*)(void*));
+void freeKitchen(pList);
+void freeAll(pRestaurant);
+Bool isProductNameValid(char* name);
+Bool isIntPositive(float);
 Bool isOperationValid(float);
-void checkName(pList, char*);
+pProduct getProductPtr(pList , char*);
 
 #endif //  _Restaurant
-
