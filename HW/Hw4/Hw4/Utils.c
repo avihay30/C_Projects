@@ -1,4 +1,4 @@
-#include "Restaurant.h"
+/* #include "Restaurant.h"
 
 // Function checks if pointer allocation is invalid and free memory needed and exit. 
 void checkAllocation(void* pToCheck, char* message, void* listToFree, void(*fp)(void*))
@@ -33,7 +33,7 @@ void freeAll(pRestaurant rest)
 			tables[i].head = tables[i].head->next;
 			free(tempP);
 		}
-		tables[i].head = NULL;
+		// tables[i].head = NULL; can be deleted.
 	}
 	freeKitchen(&(rest->kitchen));
 }
@@ -67,7 +67,7 @@ Bool checkTableNumber(float tableNumber)
 
 /* Function checks if a name exists in list,
    if true returns the pointer to the product, if false returns NULL. */
-pProduct getProductPtr(pList kitchen, char* productName)
+/*pProduct getProductPtr(pList kitchen, char* productName)
 {
 	pProduct temp = kitchen->head;
 	//checking for dish's instance in the kitchen
@@ -77,4 +77,4 @@ pProduct getProductPtr(pList kitchen, char* productName)
 		temp = temp->next;
 	}
 	return NULL;
-}
+} */

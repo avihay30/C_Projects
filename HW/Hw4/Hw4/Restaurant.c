@@ -36,7 +36,7 @@ void CreateProducts(pList prodList)
 		tempProd->Price = (int)price;
 		tempProd->next = NULL;
 		
-		// inserting to end of list
+		// inserting to tail of list
 		if (prodList->head == NULL)
 			prodList->head = tempProd;
 		else
@@ -47,56 +47,59 @@ void CreateProducts(pList prodList)
 	printf(KITCHEN_CREATED);
 }
 
-void AddItems(pList prodList, char* productName, float quantity)
+void AddItems(pList prodList, char* productName, float fQuantity)
 {
 	pProduct productPtr;
-	productPtr = getProductPtr(prodList ,productName);
+	productPtr = getProductPtr(prodList, productName);
 	if(productPtr == NULL){
-		printf("%s does not exist in the kitchen!\n",productName);
+		printf("%s does not exist in the kitchen!\n", productName);
 		return;
 	}
-	if (quantity < 0.0 || floor(quantity) != ceil(quantity)){
+	if (!isIntPositive(fQuantity)) {
 		printf("Invalid given product quantity!\n");
 		return;
 	}
-	productPtr->Quantity += (int)quantity;
-	printf(ADD_TO_KITCHEN, (int)quantity, productName);
+	productPtr->Quantity += (int)fQuantity;
+	printf(ADD_TO_KITCHEN, (int)fQuantity, productName);
 }
 
-void OrderItem(pRestaurant rest, float fTableNumber, char* productName, float quantity)
+void OrderItem(pRestaurant rest, float fTableNumber, char* productName, float fQuantity)
 {
+	int tableNumber, quantity;
 	pProduct productPtr;
-	pOrder putAnOrder;
-	pOrder tableOrders;
-	int tableNumber;
-	if(!checkTableNumber(fTableNumber)){
+	pOrder currentOrder;
+
+	if(!checkTableNumber(fTableNumber)) { // table number validation
 		printf(INVALID_TABLE_NUM);
 		return;
 	}
+
 	tableNumber = (int)fTableNumber;
-	productPtr = getProductPtr(&(rest->kitchen) ,productName);
-	if(productPtr == NULL){
-		printf(PRODUCT_UNAVILEBLE,productName);
+	productPtr = getProductPtr(&(rest->kitchen), productName);
+	if(productPtr == NULL) { // if name doen't exists in kitchen.
+		printf(PRODUCT_UNAVILEBLE, productName);
 		return;
 	}
-	if(!isIntPositive(quantity) && (int)quantity > productPtr->Quantity){
+	if (!isIntPositive(fQuantity) && (int)fQuantity > productPtr->Quantity) { // quantity number validation
 		printf("Invalid given product quantity!\n");
 		return;
 	}
-	productPtr->Quantity -= (int)quantity;
-	putAnOrder = (pOrder)malloc(sizeof(order));
-	checkAllocation(putAnOrder, ALLOC_ERR, rest, freeAll);
-	putAnOrder->Quantity = (int)quantity;
-	putAnOrder->product = productPtr;
-	putAnOrder->next = NULL;
-	tableOrders = rest->tables[tableNumber].head;
-	if (tableOrders == NULL)
-		rest->tables[tableNumber].head = putAnOrder;
-	else{
-		putAnOrder->next = tableOrders;
-		rest->tables[tableNumber].head = putAnOrder;
-	}
-	printf(ADD_TO_TABLE, (int)quantity, productName, (int)tableNumber);
+	quantity = (int)fQuantity;
+
+	// building node
+	currentOrder = (pOrder)malloc(sizeof(order));
+	checkAllocation(currentOrder, ALLOC_ERR, rest, freeAll);
+	currentOrder->Quantity = quantity;
+	// having pointer to product in kitchen in order to save redundent malloc to prodName again.
+	// and for calculation of price in "RemoveTable" function below.
+	currentOrder->product = productPtr;
+	currentOrder->next = NULL;
+
+	// inserting to head of list
+	currentOrder->next = rest->tables[tableNumber].head;
+	rest->tables[tableNumber].head = currentOrder;
+	productPtr->Quantity -= quantity;
+	printf(ADD_TO_TABLE, quantity, productName, tableNumber);
 }
 
 void RemoveItem(orders tables[], float fTableNumber)
@@ -126,9 +129,8 @@ void RemoveItem(orders tables[], float fTableNumber)
 void RemoveTable(orders tables[], float fTableNumber)
 {
 	pOrder orderToDelete;
-	int priceToPay = 0;
+	int tableNumber, priceToPay = 0;
 	float tipToPay;
-	int tableNumber;
 	if(!checkTableNumber(fTableNumber)){
 		printf(INVALID_TABLE_NUM);
 		return;
@@ -146,7 +148,88 @@ void RemoveTable(orders tables[], float fTableNumber)
 		free(orderToDelete);
 		orderToDelete = tables[tableNumber].head;
 	}
-	tipToPay = priceToPay * (float)0.15;
-	printf(PRICE, priceToPay, (int)tipToPay);
+	tipToPay = (float)priceToPay * 0.15;
+	printf(PRICE, priceToPay, (int)tipToPay); // todo: check if tip is int
 	tables[tableNumber].head = NULL;
+}
+
+// _-'-_ Util functions _-'-_
+
+// Function checks if pointer allocation is invalid and free memory needed and exit. 
+void checkAllocation(void* pToCheck, char* message, void* listToFree, void(*fp)(void*))
+{
+	if (pToCheck == NULL) {
+		fprintf(stderr, "%s\n", message);
+		fp(listToFree);
+		exit(1); // closes file automaticaly
+	}
+}
+
+// Function gets an pointer and free all allocated memory of kitchen.
+void freeKitchen(pList prodList)
+{
+	pProduct tempP;
+	while (prodList->head != NULL) {
+		free(prodList->head->ProductName);
+		tempP = prodList->head->next;
+		free(prodList->head);
+		prodList->head = tempP;
+	}
+	prodList->tail = NULL; // reseting to initial value[head already = NULL].
+}
+
+void freeAll(pRestaurant rest)
+{
+	int i;
+	pOrders tables = rest->tables;
+	pOrder tempP;
+	for (i = 0; i < NUMBER_OF_TABLES; i++) {
+		while (tables[i].head != NULL) {
+			tempP = tables[i].head;
+			tables[i].head = tables[i].head->next;
+			free(tempP);
+		}
+	}
+	freeKitchen(&(rest->kitchen));
+}
+
+Bool isProductNameValid(char* name) {
+	if (strlen(name) == 0 || strlen(name) > MAX_NAME_SIZE)
+		return FALSE;
+	return TRUE;
+}
+
+Bool isIntPositive(float floatToCheck) {
+	if (floatToCheck < 0.0 || floor(floatToCheck) != ceil(floatToCheck)) // if negative or not int.
+		return FALSE;
+	return TRUE;
+}
+
+Bool isOperationValid(float op)
+{
+	// checks int op and its required boundries.
+	if (op < 0.0 || op > 5.0 || floor(op) != ceil(op))
+		return FALSE;
+	return TRUE; // logical else
+}
+
+Bool checkTableNumber(float tableNumber)
+{
+	if (tableNumber < 0.0 || tableNumber > NUMBER_OF_TABLES || floor(tableNumber) != ceil(tableNumber))
+		return FALSE;
+	return TRUE;
+}
+
+/* Function checks if a name exists in list,
+   if true returns the pointer to the product, if false returns NULL. */
+pProduct getProductPtr(pList kitchen, char* productName)
+{
+	pProduct temp = kitchen->head;
+	//checking for product instance in the kitchen
+	while (temp != NULL) {
+		if (!strcmp(temp->ProductName, productName))
+			return temp;
+		temp = temp->next;
+	}
+	return NULL;
 }
