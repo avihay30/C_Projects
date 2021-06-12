@@ -7,11 +7,12 @@
 #include <string.h>
 #include <math.h>
 
+// Define Declerations.
 #define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!\n"
 #define FILE_ERR "FileError: The program couldn't create/read file!\n"
 #define FILE_READ_ERR "Read-File Error: the input file is empty or invalid!!\n"
 #define INSTRUCTIONS_ERR "Read-File Error: the instructions file is empty or invalid!!\n"
-#define NAME_DUPL_ERR "Read-File Error: the Mantot file has duplicte %s product!!\n"
+#define NAME_DUPL_ERR "Read-File Error: the Mantot file has duplicate %s product!!\n"
 #define INVALID_TABLE_NUM "Invalid table number!\n"
 #define NUMBER_OF_TABLES 50
 #define MAX_NAME_SIZE 50
@@ -20,9 +21,10 @@
 #define PRODUCT_UNAVILEBLE "We don`t have %s, sorry!\n" // %s- prod name
 #define ADD_TO_TABLE "%d %s were added to the table number %d\n" // %d- NO. prod, %s- prod name, %d- NO. table
 #define PRODUCT_RETURNED "%d %s was returned to the kitchen from table number %d\n" // %d- NO. prod, %s- prod name, %d- NO. table
-#define TABLE_DIDNT_ORDERD "The table number %d is not ordered yet\n" // %d NO. table
-#define PRICE "%d nis + %d nis for tips, please!\n" // %d- total price, %d- tip
+#define TABLE_DIDNT_ORDERED "The table number %d is not ordered yet\n" // %d NO. table
+#define PRICE "%d nis + %g nis for tips, please!\n" // %d- total price, %g- tip
 
+// Struct Declerations. 
 typedef enum { FALSE, TRUE } Bool;
 
 // define product(node) struct
@@ -60,6 +62,7 @@ typedef struct restaurant
 	orders tables[NUMBER_OF_TABLES];
 }restaurant, *pRestaurant;
 
+// Prototype Declerations.
 void CreateProducts(pList);
 void AddItems(pList, char*, float);
 void OrderItem(pRestaurant, float, char*, float);

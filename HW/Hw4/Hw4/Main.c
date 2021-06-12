@@ -8,16 +8,19 @@ int main()
 	float foperation, tableNum, quantity;
 	int operation, numOfInputs;
 	char prodName[MAX_NAME_SIZE + 100];
-	for (i = 0; i < NUMBER_OF_TABLES; i++){
+
+	// reseting rest list.
+	for (i = 0; i < NUMBER_OF_TABLES; i++) { // setting restaurent tables.
 		rest.tables[i].head = NULL;
 		rest.tables[i].isCanceledOrder = FALSE;
 	}
-
 	rest.kitchen.head = rest.kitchen.tail = NULL;
+
 	f = fopen("Instructions.txt", "rt");
 	checkAllocation(f, FILE_ERR, &rest, freeAll);
+	// reading Instructions.txt and call the appropriate functions.
 	while ((numOfInputs = fscanf(f, "%f", &foperation)) != EOF) {
-		if (numOfInputs != 1 || !isOperationValid(foperation))
+		if (numOfInputs != 1 || !isOperationValid(foperation)) // checking instructions.txt
 			checkAllocation(NULL, FILE_READ_ERR, &rest, freeAll);
 		operation = (int)foperation; // operation is valid.
 
@@ -33,25 +36,25 @@ int main()
 			printf("Operation 1 cannot be happend twice!\n");
 			continue;
 		}
-
+		// call the appropriate functions
 		switch (operation) {
 		case 1:
 			CreateProducts(&(rest.kitchen));
 			break;
 		case 2:
-			fscanf(f, "%s %f", prodName, &quantity); // no need to check.
+			fscanf(f, "%s %f", prodName, &quantity); // assume file valid(as noted)
 			AddItems(&(rest.kitchen), prodName, quantity);
 			break;
 		case 3:
-			fscanf(f, "%f %s %f", &tableNum, prodName, &quantity); // no need to check.
+			fscanf(f, "%f %s %f", &tableNum, prodName, &quantity); // assume file valid(as noted)
 			OrderItem(&rest, tableNum, prodName, quantity);
 			break;
 		case 4:
-			fscanf(f, "%f", &tableNum); // no need to check.
+			fscanf(f, "%f", &tableNum); // assume file valid(as noted)
 			RemoveItem(rest.tables, tableNum);
 			break;
 		case 5:
-			fscanf(f, "%f", &tableNum); // no need to check.
+			fscanf(f, "%f", &tableNum); // assume file valid(as noted)
 			RemoveTable(rest.tables, tableNum);
 			break;
 		}
