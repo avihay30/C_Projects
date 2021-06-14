@@ -5,7 +5,7 @@ int main()
 	FILE* f;
 	restaurant rest; // init restaurant.
 	int i;
-	float foperation, tableNum, quantity;
+	float fOperation, tableNum, quantity;
 	int operation, numOfInputs;
 	char prodName[MAX_NAME_SIZE + 100];
 
@@ -19,10 +19,10 @@ int main()
 	f = fopen("Instructions.txt", "rt");
 	checkAllocation(f, FILE_ERR, &rest, freeAll);
 	// reading Instructions.txt and call the appropriate functions.
-	while ((numOfInputs = fscanf(f, "%f", &foperation)) != EOF) {
-		if (numOfInputs != 1 || !isOperationValid(foperation)) // checking instructions.txt
+	while ((numOfInputs = fscanf(f, "%f", &fOperation)) != EOF) {
+		if (numOfInputs != 1 || !isOperationValid(fOperation)) // checking instructions.txt
 			checkAllocation(NULL, FILE_READ_ERR, &rest, freeAll);
-		operation = (int)foperation; // operation is valid.
+		operation = (int)fOperation; // operation is valid.
 
 		// if first run and operation isn't 1.
 		if (rest.kitchen.head == NULL && operation != 1) {

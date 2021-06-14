@@ -103,7 +103,6 @@ void OrderItem(pRestaurant rest, float fTableNumber, char* productName, float fQ
 	// having pointer to product in kitchen in order to save redundent malloc to prodName again.
 	// and for calculation of price in "RemoveTable" function below.
 	currentOrder->product = productPtr;
-	currentOrder->next = NULL;
 
 	// inserting to head of list
 	currentOrder->next = rest->tables[tableIndex].head;
@@ -117,8 +116,8 @@ void OrderItem(pRestaurant rest, float fTableNumber, char* productName, float fQ
    removes the last order of the table (if exists) */
 void RemoveItem(orders tables[], float fTableNumber)
 {
-	pOrder orderToDelete;
 	int tableIndex;
+	pOrder orderToDelete;
 	if (!checkTableNumber(fTableNumber)) { // table number validation.
 		printf(INVALID_TABLE_NUM);
 		return;
@@ -163,12 +162,12 @@ void RemoveTable(orders tables[], float fTableNumber)
 		printf("%d %s, ", orderToDelete->Quantity, orderToDelete->product->ProductName);
 		priceToPay += orderToDelete->product->Price * orderToDelete->Quantity;
 		tables[tableIndex].head = tables[tableIndex].head->next;
-		free(orderToDelete);
+		free(orderToDelete); // no need to free ProductName because it's under kitchen list.
 		orderToDelete = tables[tableIndex].head;
 	}
 	tipToPay = (float)priceToPay * 0.15;
 	printf(PRICE, priceToPay, tipToPay);
-	tables[tableIndex].head = NULL; // reseting head to null.
+	tables[tableIndex].isCanceledOrder = FALSE; // reseting list(head is already null).
 }
 
 // _-'-_ Util functions _-'-_
@@ -217,7 +216,7 @@ void freeAll(pRestaurant rest)
 Bool isProductNameValid(char* name) {
 	if (strlen(name) == 0 || strlen(name) > MAX_NAME_SIZE)
 		return FALSE;
-	return TRUE;
+	return TRUE; // logical else
 }
 
 // Function gets a float and returns whether it's a positive int.
@@ -225,7 +224,7 @@ Bool isIntPositive(float floatToCheck) {
 	// if negative or not int.
 	if (floatToCheck <= 0.0 || floor(floatToCheck) != ceil(floatToCheck))
 		return FALSE;
-	return TRUE;
+	return TRUE; // logical else
 }
 
 // Function gets a float of an operation and returns whether it's valid[1,5].
@@ -242,7 +241,7 @@ Bool checkTableNumber(float tableNumber)
 {
 	if (tableNumber < 1.0 || tableNumber > NUMBER_OF_TABLES || floor(tableNumber) != ceil(tableNumber))
 		return FALSE;
-	return TRUE;
+	return TRUE; // logical else
 }
 
 /* Function checks if a name exists in list,
