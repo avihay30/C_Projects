@@ -7,6 +7,7 @@ int main()
 	int i, delNum, arr[NUM] = { 1, 2, 3, 4, 5 }; 
 	queue.head = queue.tail = NULL;
 	queue.size = 0;
+
 	for (i = 0; i < NUM; i++) {
 		Enqueue(&queue, arr[i]);
 	}

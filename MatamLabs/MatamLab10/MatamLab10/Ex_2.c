@@ -31,10 +31,9 @@ int main()
 	Library Libr;        
 	int i;
 	
-	in = fopen("input.txt", "rt");
+	in = fopen("one.txt", "rt");
 	if (in == NULL)
 		Error_Msg("The input file is wrong");
-
 	input_library(&Libr,in);
 	fclose(in);
 

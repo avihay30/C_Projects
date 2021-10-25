@@ -1,5 +1,4 @@
 #include "Queue.h"
-
 /* Function gets a queue and a number 
    and inserts new node(with number) to queue(to tail). */
 void Enqueue(PQue q, int new_elem)

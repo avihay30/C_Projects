@@ -8,7 +8,7 @@
 #define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!\n"
 
 typedef struct Item{
-	int num; 
+	int num;
 	struct Item* next;
 }Item;
 
