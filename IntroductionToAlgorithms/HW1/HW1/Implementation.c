@@ -60,11 +60,13 @@ Bool isKeyExists(pTreeNode treeNode, int key) {
 }
 
 void printKNodesInorder(pTreeNode treeNode, int *k) {
-	if (k == 0 || treeNode == NULL)
+	if (*k <= 0 || treeNode == NULL)
 		return;
 
 	printKNodesInorder(treeNode->left, k);
 	*k = *k - 1;
+	if (*k < 0)
+		return;
 	printf("%d -> ", treeNode->key);
 	printKNodesInorder(treeNode->right, k);
 }

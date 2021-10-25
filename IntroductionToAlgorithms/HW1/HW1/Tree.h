@@ -12,7 +12,7 @@
 #define KEY_DOESNT_EXISTS_ERR "IsKeyExist: Couldn't find the key %d!\n"
 #define KEY_EXISTS "IsKeyExist: The key %d was found!\n"
 #define OPERATION_ERR "OperationError: Given operation isn't valid, Please try again!\n"
-#define PRINT_K_KEYS_ERR "PrintKKeysError: Given k keys to print is invalid, Please try again!\n"
+#define PRINT_K_KEYS_ERR "PrintKKeysError: Given k keys to print is invalid (maybe too large), Please try again!\n"
 #define INPUT_NEW_INT "Please enter %s ->: "
 #define NEW_INT_INPUT_ERR "\nWrong %s, Please try again!"
 

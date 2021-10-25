@@ -60,10 +60,9 @@ int main()
 		case PRINT_K_KEYS_BY_INORDER:
 			inputInt("amount of keys to print", "amount", &numOfKeysToPrint);
 			while (numOfKeysToPrint > tree.numOfNodes) {
-				// todo: add error here
 				inputInt(PRINT_K_KEYS_ERR, "amount", &numOfKeysToPrint);
 			}
-			printf("Print %d keys by Inorder ->\n", numOfKeysToPrint);
+			printf("Printing %d keys by Inorder ->\n", numOfKeysToPrint);
 			printKNodesInorder(tree.treeRoot, &numOfKeysToPrint);
 			printf("\n\n");
 			break;
