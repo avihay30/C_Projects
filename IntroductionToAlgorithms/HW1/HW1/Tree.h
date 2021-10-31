@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 // Define Declerations.
 #define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!\n"
@@ -14,7 +15,7 @@
 #define OPERATION_ERR "OperationError: Given operation isn't valid, Please try again!\n"
 #define PRINT_K_KEYS_ERR "PrintKKeysError: Given k keys to print is invalid (maybe too large), Please try again!\n"
 #define INPUT_NEW_INT "Please enter %s ->: "
-#define NEW_INT_INPUT_ERR "\nWrong %s, Please try again!"
+#define NEW_INT_INPUT_ERR "\nWrong %s, Please try again!\n"
 
 #define EQUALS  0
 #define VALID_INPUT 1
@@ -58,8 +59,10 @@ void printKNodesInorder(pTreeNode, int*);
 treeNode* createTreeNode(int);
 pTreeNode* findPNodePostion(pTreeNode*, int);
 void freeAll(pTreeNode);
-void inputInt(const char* , const char* , int*);
+void inputInt(char*, char*, int*);
+void getOperation(double*, int*);
 void printUserMenu();
 void initError(Error*);
+void initTreeDate(treeData*);
 
 #endif // _Tree

@@ -2,18 +2,20 @@
 
 int main()
 {
-	treeData tree; // init tree.
 	int operation = 0;
 	int getNewKey, numOfKeysToPrint;
+	double dummyOperation = 0;
+	// Init tree
+	treeData tree;
 	Error err;
-	Bool isKeyOccur;
+	Bool isKeyInTree;
 
-	// init tree data.
-	tree.numOfNodes = 0;
-	tree.treeRoot = NULL;
+	// Init tree data.
+	initTreeDate(&tree);
 	while (operation != END_PROGRAM) {
 		printUserMenu();
-		scanf("%d", &operation);
+		getOperation(&dummyOperation, &operation);
+
 		// call the appropriate functions
 		switch (operation) {
 		case ADD_NEW_NODE:
@@ -48,8 +50,8 @@ int main()
 
 		case FIND_KEY:
 			inputInt("key to search", "key", &getNewKey);
-			isKeyOccur = isKeyExists(tree.treeRoot, getNewKey);
-			if (isKeyOccur == FALSE) {
+			isKeyInTree = isKeyExists(tree.treeRoot, getNewKey);
+			if (isKeyInTree == FALSE) {
 				printf(KEY_DOESNT_EXISTS_ERR, getNewKey);
 			}
 			else {
@@ -69,6 +71,7 @@ int main()
 
 		case END_PROGRAM:
 			freeAll(tree.treeRoot);
+			initTreeDate(&tree);
 			break;
 
 		default:
