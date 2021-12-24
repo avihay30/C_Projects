@@ -13,7 +13,7 @@ void addTreeNode(pTreeNode *treeNode, int key, Error* error) {
 			error->allocErr = TRUE;
 			return;
 		}
-		// Logical else, If no error accured while adding new node.
+		// Logical else, If no error accrued while adding new node.
 		*treeNode = temp;
 	}
 	// If key exists.
@@ -22,7 +22,7 @@ void addTreeNode(pTreeNode *treeNode, int key, Error* error) {
 	}
 }
 
-// Print tree inorder sequnce.
+// Print tree inorder sequence.
 void printInorder(pTreeData tData) {
 	int numOfNodesInTree = tData->numOfNodes;
 	printKNodesInorder(tData->treeRoot, &numOfNodesInTree);
@@ -94,7 +94,7 @@ treeNode* createTreeNode(int key) {
 	If exists return the address of the pNode that contains the key.
 	else, return the appropriate address to place the not existed node. */
 pTreeNode* findPNodePostion(pTreeNode *treeNode, int key) {
-	// Arrived to exsiting node or the appropriate position of the node.
+	// Arrived to existing node or the appropriate position of the node.
 	if (*treeNode == NULL || (*treeNode)->key == key)
 		return treeNode;
 

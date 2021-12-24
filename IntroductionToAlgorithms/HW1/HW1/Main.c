@@ -70,14 +70,14 @@ int main()
 			break;
 
 		case END_PROGRAM:
-			freeAll(tree.treeRoot);
-			initTreeDate(&tree);
 			break;
 
 		default:
 			puts(OPERATION_ERR);
 		}
 	}
+	freeAll(tree.treeRoot);
+	initTreeDate(&tree);
 	printf("\n\n---------------- Ty :) ----------------\n\n");
 	return 0;
 }
