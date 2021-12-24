@@ -10,6 +10,7 @@ D=M
 @sfc
 @R2
 @x
+@sfc
 D=D+M
 //D=D+17
 @17

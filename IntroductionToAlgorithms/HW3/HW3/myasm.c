@@ -289,8 +289,8 @@ void addEntry(pSymbolAddr symbolTable, char* symbol, int* nextAddress) {
 // Checks whether symbol exists in the table
 Bool contains(pSymbolAddr symbolTable, int addrCtr, char* symbol) {
 	int i;
-	// itarating on table
-	for (i = 0; i < addrCtr; i++) {
+	// itarating on table (+2 is for screen and kbd symbols)
+	for (i = 0; i < addrCtr + 2; i++) {
 		// if the symbol exists
 		if (strcmp(symbolTable[i].symbol, symbol) == 0) {
 			return TRUE;
@@ -303,8 +303,8 @@ Bool contains(pSymbolAddr symbolTable, int addrCtr, char* symbol) {
 // else returns -1 (not valid address)
 int getAddress(pSymbolAddr symbolTable, int addrCtr, char* symbol) {
 	int i;
-	// itarating on table
-	for (i = 0; i < addrCtr; i++) {
+	// itarating on table (+2 is for screen and kbd symbols)
+	for (i = 0; i < addrCtr + 2; i++) {
 		// if the symbol exists
 		if (strcmp(symbolTable[i].symbol, symbol) == 0) {
 			return symbolTable[i].address;
