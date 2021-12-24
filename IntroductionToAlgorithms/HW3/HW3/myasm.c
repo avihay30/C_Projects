@@ -251,8 +251,9 @@ void convertCIntsToBin(pDestAndBin destTable, pCompAndBin compTable, pJumpAndBin
 void initTable(pSymbolAddr *symbolTable) {
 	int i;
 	// str that represents the postfix of R
-	char strIndex[10];
-	char symbol[10];
+	// (e.g strIndex = "12", symbol = "R12")
+	char strIndex[3];
+	char symbol[4];
 	pSymbolAddr newTable = (pSymbolAddr)malloc(ASM_FILE_SIZE * sizeof(symbolAddr));
 	checkAllocation(newTable, ALLOC_ERR);
 
@@ -265,11 +266,19 @@ void initTable(pSymbolAddr *symbolTable) {
 		strcpy(newTable[i].symbol, symbol);
 		newTable[i].address = i;
 	}
+	// adding screen and kbd symbols (i = 16)
+	strcpy(newTable[i].symbol, "SCREEN");
+	newTable[i].address = 16384;
+	strcpy(newTable[i + 1].symbol, "KBD");
+	newTable[i + 1].address = 24576;
+
 	*symbolTable = newTable;
 }
 
 void addEntry(pSymbolAddr symbolTable, char* symbol, int* nextAddress) {
-	pSymbolAddr pToInsert = symbolTable + (*nextAddress);
+	// moving pointer to look on the first empty slot in table
+	// (+2 is for skipping screen and kbd symbols)
+	pSymbolAddr pToInsert = symbolTable + (*nextAddress) + 2;
 	// Fill row in table
 	strcpy(pToInsert->symbol, symbol);
 	pToInsert->address = *nextAddress;
@@ -391,7 +400,6 @@ void getOutputFileName(char* fileName, char* outputFile) {
 }
 
 
-// TODO: check if to add SCREEN & KBD
 int main()
 {
 	FILE* asmFile, *hackFile;
