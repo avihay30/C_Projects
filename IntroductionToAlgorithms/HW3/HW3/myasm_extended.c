@@ -1,6 +1,7 @@
 /*
-* Filename: myasm.c
+* Filename: myasm_extended.c
 * Gets some <name>.asm file and creates a converted <name>.hack file (binary representation).
+* The Program is extended, can accept symbols (words) in A instructions.
 * According to requirements of Nand2Tetris course.
 */
 #define _CRT_SECURE_NO_WARNINGS
@@ -12,7 +13,7 @@
 #define ALLOC_ERR "AlloctionError: The program couldn't allocate memory!\n"
 #define FILE_ERR "FileError: The program couldn't create/read file!\n"
 #define FILE_NAME_SIZE 20
-#define ASM_EXTETION_LENGTH 4
+#define ASM_EXTENTION_LENGTH 4
 #define ASM_FILE_SIZE 300
 #define INS_FIELD_MAX_SIZE 3
 #define BIT_SIZE 16
@@ -49,11 +50,18 @@ typedef struct jumpAndBin {
 	char bin[4];
 } jumpAndBin, * pJumpAndBin;
 
+// struct for holding SymbolTable row data
+typedef struct symbolAddr {
+	char symbol[ASM_FILE_SIZE];
+	int address;
+} symbolAddr, *pSymbolAddr;
+
 /* Util functions */
 char* trim(char*);
 char* trimInline(char*);
 char* trimTrailingComments(char*);
 void resetBinaryStr(char*);
+Bool isSymbolIsNumber(char*);
 void convertDecimalToBin(int, char*);
 void checkAllocation(void*, char*);
 void getOutputFileName(char*, char*);
@@ -71,6 +79,12 @@ void initCompTable(pCompAndBin*);
 void initDestTable(pDestAndBin*);
 void initJumpTable(pJumpAndBin*);
 void convertCIntsToBin(pDestAndBin, pCompAndBin, pJumpAndBin, asmLine*, char*);
+
+// SymbolTable "module"
+void initTable(pSymbolAddr*);
+void addEntry(pSymbolAddr, char*, int*);
+Bool contains(pSymbolAddr, int, char*);
+int getAddress(pSymbolAddr, int, char*);
 
 // Function returns which instraction ins is
 InstractionType getInstractionType(char ins) {
@@ -156,10 +170,9 @@ void initCompTable(pCompAndBin *compTable) {
 
 // Creates and initializes a predifiend DestTable (there are 8 values)
 void initDestTable(pDestAndBin *destTable) {
-	int i;
+	int i, j;
 	// "0" in dest is equal to null
 	char dest[8][4] = { "0", "M", "D", "DM", "A", "AM", "AD", "ADM" };
-	char bin[8][4] = { "000", "001", "010", "011", "100", "101", "110", "111" };
 
 	pDestAndBin newTable = (pDestAndBin)malloc(8 * sizeof(destAndBin));
 	checkAllocation(newTable, ALLOC_ERR);
@@ -167,7 +180,16 @@ void initDestTable(pDestAndBin *destTable) {
 	// filling table
 	for (i = 0; i < 8; i++) {
 		strcpy(newTable[i].dest, dest[i]);
-		strcpy(newTable[i].bin, bin[i]);
+		strcpy(newTable[i].bin, "000");
+		// inserting ones if specific letter is exists in dest
+		for (j = 0; j < 3; j++) {
+			if (dest[i][j] == 'A')
+				newTable[i].bin[0] = '1';
+			else if (dest[i][j] == 'D')
+				newTable[i].bin[1] = '1';
+			else if (dest[i][j] == 'M')
+				newTable[i].bin[2] = '1';
+		}
 	}
 
 	*destTable = newTable;
@@ -210,6 +232,73 @@ void convertCIntsToBin(pDestAndBin destTable, pCompAndBin compTable, pJumpAndBin
 	strcat(binaryStr, compTable->bin);
 	strcat(binaryStr, destTable->bin);
 	strcat(binaryStr, jumpTable->bin);
+}
+
+// Creates and initializes a SymbolTable with predifiend values
+// no need to fill predefined labels
+void initTable(pSymbolAddr *symbolTable) {
+	int i;
+	// str that represents the postfix of R
+	// (e.g strIndex = "12", symbol = "R12")
+	char strIndex[3];
+	char symbol[4];
+	pSymbolAddr newTable = (pSymbolAddr)malloc(ASM_FILE_SIZE * sizeof(symbolAddr));
+	checkAllocation(newTable, ALLOC_ERR);
+
+	// filling [R0, R15] rows
+	for (i = 0; i < 16; i++) {
+		symbol[0] = 'R';
+		symbol[1] = '\0';
+		_itoa(i, strIndex, 10);
+		strcat(symbol, strIndex);
+		strcpy(newTable[i].symbol, symbol);
+		newTable[i].address = i;
+	}
+	// adding screen and kbd symbols (i = 16)
+	strcpy(newTable[i].symbol, "SCREEN");
+	newTable[i].address = 16384;
+	strcpy(newTable[i + 1].symbol, "KBD");
+	newTable[i + 1].address = 24576;
+
+	*symbolTable = newTable;
+}
+
+void addEntry(pSymbolAddr symbolTable, char* symbol, int* nextAddress) {
+	// moving pointer to look on the first empty slot in table
+	// (+2 is for skipping screen and kbd symbols)
+	pSymbolAddr pToInsert = symbolTable + (*nextAddress) + 2;
+	// Fill row in table
+	strcpy(pToInsert->symbol, symbol);
+	pToInsert->address = *nextAddress;
+	// Increment table counter
+	(*nextAddress)++;
+}
+
+// Checks whether symbol exists in the table
+Bool contains(pSymbolAddr symbolTable, int addrCtr, char* symbol) {
+	int i;
+	// iterating on table (+2 is for screen and kbd symbols)
+	for (i = 0; i < addrCtr + 2; i++) {
+		// if the symbol exists
+		if (strcmp(symbolTable[i].symbol, symbol) == 0) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+// Returns the address associated with symbol if exists, 
+// else returns -1 (not valid address)
+int getAddress(pSymbolAddr symbolTable, int addrCtr, char* symbol) {
+	int i;
+	// iterating on table (+2 is for screen and kbd symbols)
+	for (i = 0; i < addrCtr + 2; i++) {
+		// if the symbol exists
+		if (strcmp(symbolTable[i].symbol, symbol) == 0) {
+			return symbolTable[i].address;
+		}
+	}
+	return -1;
 }
 
 // Removes all white spaces (start, end) from string and between chars
@@ -273,6 +362,18 @@ void resetBinaryStr(char* binStr) {
 	binStr[BIT_SIZE] = '\0';
 }
 
+// Function checks whether symbol is only number (i.g @65) 
+Bool isSymbolIsNumber(char* symbol) {
+	// while *symbol is digit
+	while (*symbol >= '0' && *symbol <= '9') {
+		symbol++;
+		// if *symbol was digit and now line ended.
+		if (*symbol == '\n' || *symbol == '\0')
+			return TRUE;
+	}
+	return FALSE;
+}
+
 // Function gets a decimal number as a string
 // and convert it to binary
 void convertDecimalToBin(int decimal, char* binaryStr) {
@@ -305,13 +406,17 @@ void getOutputFileName(char* fileName, char* outputFile) {
 	strcpy(pToExtention, "hack");
 }
 
+
 int main()
 {
 	FILE* asmFile, *hackFile;
 	asmLine parsedline;
+	pSymbolAddr symbolTable = NULL;
 	pDestAndBin destTable = NULL;
 	pCompAndBin compTable = NULL;
 	pJumpAndBin jumpTable = NULL;
+	// counter for table length
+	int nextEmptyAddress = 16;
 	// helper variable for A_instraction
 	int address;
 	// Adding 4 for file extention (.asm)
@@ -334,6 +439,7 @@ int main()
 	checkAllocation(asmFile, FILE_ERR);
 	hackFile = fopen(outputName, "wt");
 	checkAllocation(hackFile, FILE_ERR);
+	initTable(&symbolTable);
 	initDestTable(&destTable);
 	initCompTable(&compTable);
 	initJumpTable(&jumpTable);
@@ -352,7 +458,20 @@ int main()
 		parsedline.insType = getInstractionType(line[0]);
 		if (parsedline.insType == A_INSTRUCTION) {
 			getSymbol(line, parsedline.symbol);
-			address = atoi(parsedline.symbol);
+			if (isSymbolIsNumber(parsedline.symbol)) {
+				address = atoi(parsedline.symbol);
+			}
+			// read and/or add to table 
+			else {
+				// if symbol doesn't exist in table
+				if (!contains(symbolTable, nextEmptyAddress, parsedline.symbol)) {
+					address = nextEmptyAddress;
+					addEntry(symbolTable, parsedline.symbol, &nextEmptyAddress);
+				} // symbol exists in table 
+				else {
+					address = getAddress(symbolTable, nextEmptyAddress, parsedline.symbol);
+				}
+			}
 			convertDecimalToBin(address, binLine);
 		}
 		// equal to if (lineType == C_INSTRUCTION)
@@ -369,6 +488,7 @@ int main()
 	printf("\n\nOutput file %s is now available", outputName);
 	fclose(asmFile);
 	fclose(hackFile);
+	free(symbolTable);
 	free(destTable);
 	free(compTable);
 	free(jumpTable);
