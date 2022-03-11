@@ -7,6 +7,8 @@ void Error(char* msg) {
     exit(1);
 }
 
+/* Convert the first arg in argv and split it with '@' as a delimeter,
+   then print it in uppercase letters. */
 int main(int argc, char* argv[]) {
     FILE* out = stdout;
     int i;

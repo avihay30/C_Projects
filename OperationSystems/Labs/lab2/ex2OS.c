@@ -7,6 +7,7 @@ void Error(char* msg) {
     exit(1);
 }
 
+// calculate average of all args in argv.
 int main(int argc, char* argv[]) {
     FILE* out = stdout;
     int i, sum = 0;
