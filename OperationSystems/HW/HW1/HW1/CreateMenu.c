@@ -17,20 +17,22 @@ void removeEnding(char*);
 void handleUserDishNames(int);
 void parseDish(char[BUFFER_SIZE], Dish*);
 int getNamePriceSpace(int);
+char* trim(char*);
 
 // argv[1] shuold be resturant name
 // argv[2] num of items to be inserted
 int main(int argc, char* argv[]) {
     int i;
     int fd_to, wbytes;
-    int numOfItems = atoi(argv[2]);
+    int numOfItems;
     char dishTypeChar[2] = { '\0' };
     char resturantFileName[BUFFER_SIZE] = { '\0' };
     char buffer[BUFFER_SIZE] = { '\0' };
     char bufToWrite[BUFFER_SIZE] = { '\0' };
 
     if (argc != 3) Error("Invalid given arguments, should exactly two given\n");
-
+    
+    numOfItems = atoi(argv[2]);
     strcpy(resturantFileName, argv[1]);
     strcat(resturantFileName, ".txt");
     if ((fd_to = open(resturantFileName, O_WRONLY | O_CREAT, 0664)) == -1) {
@@ -88,20 +90,18 @@ void handleUserDishNames(int fd_to) {
     Dish dish;
 
     while (1) {
-        fprintf(stdout, "Insert dish name %d:\n", numOfDish);
-        
         // get dish name and price input
+        fprintf(stdout, "Insert dish name %d:\n", numOfDish);
         fgets(dishName, BUFFER_SIZE, stdin);
-        // removing '\n' from the dishName
-        removeEnding(dishName);
+        // trim all white spaces and '\n' in the end
+        strcpy(dishName, trim(dishName));
 
         // stop getting dishs from user
         if (strcmp(dishName, "Stop") == 0) return;
-
+        
         parseDish(dishName, &dish);
         // setting variable of name combined with dots to print
-        strcpy(dishNameWithDots, dish.name);
-        strcat(dishNameWithDots, DOTS);
+        sprintf(dishNameWithDots, "%s %s", dish.name, DOTS);
 
         spacer = getNamePriceSpace(dish.price);
         sprintf(dishBuffer, "  %.*s %dNIS\n", spacer, dishNameWithDots, dish.price);
@@ -121,10 +121,12 @@ void parseDish(char dishStr[BUFFER_SIZE], Dish* dish) {
     while (i >= 0 && dishStr[i] != ' ') i--;
 
     dish->price = atoi(dishStr + i);
+    // terminating string at the end of name
     dishStr[i] = '\0';
     strcpy(dish->name, dishStr);
 }
 
+// calculate the amount of space required between the name and price
 int getNamePriceSpace(int price) {
     int numOfDigits = 1;
     while (price > 9) {
@@ -133,6 +135,19 @@ int getNamePriceSpace(int price) {
     }
 
     return DOTS_LENGTH - numOfDigits;
+}
+
+char* trim(char* str) {
+    int i;
+    removeEnding(str);
+    // remove spaces in the beginning
+    while (*str == ' ' || *str == '\t') str++;
+    // remove spaces in the end
+    i = strlen(str) - 1;
+    while (*(str + i) == ' ' || *(str + i) == '\t') i--;
+    *(str + (i + 1)) = '\0';
+
+    return str;
 }
 
 void removeEnding(char* str) {
