@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
 	if (argc != 3) {
 		fprintf(stderr, "Error: Invalid given arguments, should exactly two given\n");
-		return(-1);
+		return -1;
 	}
 
 	// adding file postfix (BBB -> BBB.txt)
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	// reading from opened resturant menu file
 	do {
 		if ((rbytes = read(fd_from, buff, BUFFER_SIZE)) == -1) {
-			perror("read resturant menu"); return(-1);
+			perror("read resturant menu"); return -1;
 		}
 		totalRead += rbytes;
 		// creating a search string (based on the format of CreateMenu)

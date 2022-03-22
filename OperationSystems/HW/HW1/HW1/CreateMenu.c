@@ -36,14 +36,14 @@ int main(int argc, char* argv[]) {
     strcpy(resturantFileName, argv[1]);
     strcat(resturantFileName, ".txt");
     if ((fd_to = open(resturantFileName, O_WRONLY | O_CREAT, 0664)) == -1) {
-        perror("create/open manu"); return(-1);
+        perror("create/open manu"); return -1;
     }
     
     // writing title on file (BBB Manu)
     strcpy(bufToWrite, argv[1]);
     strcat(bufToWrite, " Menu\n");
     if ((wbytes = write(fd_to, bufToWrite, strlen(bufToWrite))) == -1) {
-        perror("write resturant name"); return(-1);
+        perror("write resturant name"); return -1;
     }
 
     for (i = 0; i < numOfItems; i++) {
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
         // write dish type
         if ((wbytes = write(fd_to, bufToWrite, strlen(bufToWrite))) == -1) {
-            perror("write dish type"); return(-1);
+            perror("write dish type"); return -1;
         }
 
         handleUserDishNames(fd_to);
@@ -66,14 +66,14 @@ int main(int argc, char* argv[]) {
     // write Bon Appetit
     strcpy(bufToWrite, "\n\t\t\tBon Appetit\n");
     if ((wbytes = write(fd_to, bufToWrite, strlen(bufToWrite))) == -1) {
-        perror("write Bon Appetit"); return(-1);
+        perror("write Bon Appetit"); return -1;
     }
 
     // create oreders directory
     strcpy(buffer, argv[1]);
     strcat(buffer, "_Order");
     if (mkdir(buffer, 0777) == -1) {
-        perror("create orders folder"); return(-1);
+        perror("create orders folder"); return -1;
     }
 
     fprintf(stdout, "Successfully created\n");
