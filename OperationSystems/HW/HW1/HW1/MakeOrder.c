@@ -13,65 +13,37 @@ typedef struct Dish {
 	int price;
 } Dish;
 
+void getUserOrder(char*, Dish[BUFFER_SIZE], int*);
 void parseDish(char[BUFFER_SIZE], Dish*, char[BUFFER_SIZE]);
-void removeEnding(char*);
+void removeNewLine(char*);
 char* trim(char*);
 int getTotalPrice(Dish[BUFFER_SIZE], int);
-void printDate(int);
+void writeTitle(int, char*);
+void writeDishOrders(int, Dish[BUFFER_SIZE], int);
+void writePrice(int, int);
+void writeDate(int);
+void assertResturantExists(char*);
+void assertConfirmation(int);
 void Error(char*);
 
 // argv[1] shuold be resturant name
 // argv[2] shuold be customer name
 int main(int argc, char* argv[]) {
-	int fd_to, wbytes, i;
-	char resFileName[BUFFER_SIZE];
+	int fd_to, dishesAmount = 0, totalPrice = 0;
 	char orderFilePath[BUFFER_SIZE];
-	char orderInfo[BUFFER_SIZE] = { '\0' };
-	char buffer[BUFFER_SIZE] = { '\0' };
 	Dish orderDishes[BUFFER_SIZE];
-	Dish* currDishPtr;
-	int dishesAmount = 0;
-	int totalPrice = 0;
 
 	if (argc != 3) {
 		fprintf(stderr, "Error: Invalid given arguments, should exactly two given\n");
 		return(1);
 	}
 
-	// adding file postfix (BBB -> BBB.txt)
-	sprintf(resFileName, "%s.txt", argv[1]);
-	// checking only if restaurant is exist.
-	if (open(resFileName, O_RDONLY) == -1) Error("Restaurant Not Found!");
-
-	// get order input
-	fprintf(stdout, "Insert your order (Finish to finish):\n");
-	while (1) {
-		fgets(orderInfo, BUFFER_SIZE, stdin);
-		// trim all white spaces and '\n' in the end
-		strcpy(orderInfo, trim(orderInfo));
-
-		// stop getting order from user
-		if (strcmp(orderInfo, "Finish") == 0) break;
-		
-		currDishPtr = &(orderDishes[dishesAmount]);
-		parseDish(orderInfo, currDishPtr, argv[1]);
-
-		// if item doesn't exists in the given restaurant.
-		// the relevant error message will be shown by getPrice procces
-		if (currDishPtr->price == -1) Error("Order is canceled");
-
-		dishesAmount++;
-	}
+	assertResturantExists(argv[1]);
+	// getting order info from user and insert it into `orderDishes` array and amount
+	getUserOrder(argv[1], orderDishes, &dishesAmount);
 	// calculating total price
 	totalPrice = getTotalPrice(orderDishes, dishesAmount);
-	// getting confirm/cancel order from user
-	fprintf(stdout, "Total Price: %d NIS (Confirm to approve/else cancel)\n", totalPrice);
-	fgets(orderInfo, BUFFER_SIZE, stdin);
-	// trim all white spaces and '\n' in the end
-	strcpy(orderInfo, trim(orderInfo));
-
-	// canceling order if not Confirmed 
-	if (strcmp(orderInfo, "Confirm") != 0) Error("Order is canceled!");
+	assertConfirmation(totalPrice);
 
 	// if order is confirmed creating new order file
 	sprintf(orderFilePath, "%s_Order/%s.txt", argv[1], argv[2]);
@@ -79,24 +51,10 @@ int main(int argc, char* argv[]) {
         perror("create/open order"); return -1;
     }
 
-	// writing title to order file
-	sprintf(buffer, "%s Order\n\n", argv[1]);
-	if ((wbytes = write(fd_to, buffer, strlen(buffer))) == -1) {
-		perror("write order title"); return -1;
-	}
-	// writing dish orders to file
-	for (i = 0; i < dishesAmount; i++) {
-		sprintf(buffer, "%s %d\n", orderDishes[i].name, orderDishes[i].amount);
-		if ((wbytes = write(fd_to, buffer, strlen(buffer))) == -1) {
-			perror("write order"); return -1;
-		}
-	}
-	// writing total price to file
-	sprintf(buffer, "Total Price: %d NIS\n\n", totalPrice);
-	if ((wbytes = write(fd_to, buffer, strlen(buffer))) == -1) {
-		perror("write order"); return -1;
-	}
-	printDate(fd_to);
+	writeTitle(fd_to, argv[1]);
+	writeDishOrders(fd_to, orderDishes, dishesAmount);
+	writePrice(fd_to, totalPrice);
+	writeDate(fd_to);
 
 	// changing file to be read-only
 	chmod(orderFilePath, 0444);
@@ -105,6 +63,34 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
+// getting order info from user and insert it into `orderDishes` array and amount
+void getUserOrder(char* restName, Dish orderDishes[BUFFER_SIZE], int* dishesAmount) {
+	char buffer[BUFFER_SIZE] = { '\0' };
+	Dish* currDishPtr;
+
+	// get order input
+	fprintf(stdout, "Insert your order (Finish to finish):\n");
+	while (1) {
+		fgets(buffer, BUFFER_SIZE, stdin);
+		// trim all white spaces and '\n' in the end
+		strcpy(buffer, trim(buffer));
+
+		// stop getting order from user
+		if (strcmp(buffer, "Finish") == 0) break;
+
+		currDishPtr = &(orderDishes[*dishesAmount]);
+		parseDish(buffer, currDishPtr, restName);
+
+		// if item doesn't exists in the given restaurant.
+		// the relevant error message will be shown by getPrice procces
+		if (currDishPtr->price == -1) Error("Order is canceled");
+
+		(*dishesAmount)++;
+	}
+}
+
+/* parsingand getting price by calling getPrice program
+   to retrive the price by the returned status */
 void parseDish(char dishStr[BUFFER_SIZE], Dish* dish, char restName[BUFFER_SIZE]) {
 	char* commend = "getPrice";
 	char* commendPath = "./getPrice";
@@ -120,7 +106,7 @@ void parseDish(char dishStr[BUFFER_SIZE], Dish* dish, char restName[BUFFER_SIZE]
 
 	// calling getPrice process to recive price of dish
 	switch (fork()) {
-	// if fork failed
+		// if fork failed
 	case -1:
 		perror("fork"); exit(-1);
 	// Only child execute this
@@ -135,12 +121,13 @@ void parseDish(char dishStr[BUFFER_SIZE], Dish* dish, char restName[BUFFER_SIZE]
 		// getPrice process returns price of dish as returnStatus
 		waitpid(-1, &returnStatus, 0);
 		returnStatus = WEXITSTATUS(returnStatus);
-		// if returnStatus is 255 (equal to -1 error), changing it to -1.
+		// if returnStatus is 255 (equal to -1 error), reseting it to -1.
 		if (returnStatus == 255) returnStatus = -1;
 		dish->price = returnStatus;
 	}
 }
 
+// trim all white spaces before and after the given string
 char* trim(char* str) {
 	int i;
 	removeEnding(str);
@@ -154,10 +141,13 @@ char* trim(char* str) {
 	return str;
 }
 
-void removeEnding(char* str) {
-	str[strlen(str) - 1] = '\0';
+// removes \n in the end of the string
+void removeNewLine(char* str) {
+	if (str[strlen(str) - 1] == '\n')
+		str[strlen(str) - 1] = '\0';
 }
 
+// calculating total price on all dishes
 int getTotalPrice(Dish orderDishes[BUFFER_SIZE], int orderSize) {
 	int i, sum = 0;
 	for (i = 0; i < orderSize; i++) 
@@ -166,7 +156,40 @@ int getTotalPrice(Dish orderDishes[BUFFER_SIZE], int orderSize) {
 	return sum;
 }
 
-void printDate(int fd_to) {
+// writing title to order file
+void writeTitle(int fd_to, char* resturantName) {
+	char buffer[BUFFER_SIZE] = { '\0' };
+
+	sprintf(buffer, "%s Order\n\n", resturantName);
+	if (write(fd_to, buffer, strlen(buffer)) == -1) {
+		perror("write order title"); return -1;
+	}
+}
+
+// writing dish orders to file
+void writeDishOrders(int fd_to, Dish orderDishes[BUFFER_SIZE], int dishesAmount) {
+	int i;
+	char buffer[BUFFER_SIZE] = { '\0' };
+
+	for (i = 0; i < dishesAmount; i++) {
+		sprintf(buffer, "%s %d\n", orderDishes[i].name, orderDishes[i].amount);
+		if (write(fd_to, buffer, strlen(buffer)) == -1) {
+			perror("write order"); return -1;
+		}
+	}
+}
+
+// writing total price to file
+void writePrice(int fd_to, int totalPrice) {
+	char buffer[BUFFER_SIZE] = { '\0' };
+
+	sprintf(buffer, "Total Price: %d NIS\n\n", totalPrice);
+	if (write(fd_to, buffer, strlen(buffer)) == -1) {
+		perror("write order"); return -1;
+	}
+}
+
+void writeDate(int fd_to) {
 	int day, month, year;
 	struct tm* local;
 	time_t now;
@@ -190,6 +213,30 @@ void printDate(int fd_to) {
 	if (write(fd_to, buffer, strlen(buffer)) == -1) {
 		perror("write date"); return(-1);
 	}
+}
+
+/* checking if Resturant is exists by trying to open Resturant menu file
+   if not, printing an error and exit program */
+void assertResturantExists(char* resturantName) {
+	char resFileName[BUFFER_SIZE];
+	// adding file postfix (BBB -> BBB.txt)
+	sprintf(resFileName, "%s.txt", resturantName);
+	// checking only if restaurant is exists.
+	if (open(resFileName, O_RDONLY) == -1) Error("Restaurant Not Found!");
+}
+
+/* asking user for Confirmation,
+   if not confirmed prompt cancel message and exit program */
+void assertConfirmation(int totalPrice) {
+	char buffer[BUFFER_SIZE] = { '\0' };
+	// getting confirm/cancel order from user
+	fprintf(stdout, "Total Price: %d NIS (Confirm to approve/else cancel)\n", totalPrice);
+	fgets(buffer, BUFFER_SIZE, stdin);
+	// trim all white spaces and '\n' in the end
+	strcpy(buffer, trim(buffer));
+
+	// canceling order if not Confirmed 
+	if (strcmp(buffer, "Confirm") != 0) Error("Order is canceled!");
 }
 
 void Error(char* msg) {

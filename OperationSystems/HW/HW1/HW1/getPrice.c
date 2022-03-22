@@ -4,31 +4,30 @@
 #include<string.h>
 
 #define BUFFER_SIZE 256
+/* max size of row in the menu,
+   will be used for going backwards (lseek) in file (in case of half reading a row). */
+#define MAX_ROW_LEN 100
 
 int getRowPrice(char*);
 void Error(char*);
 
-// argv[1] shuold be resturant name
-// argv[2] shuold be dish name
-// returns the specipied resturant's dish price
+/* argv[1] shuold be resturant name
+   argv[2] shuold be dish name
+   returns the specipied resturant's dish price */
 int main(int argc, char* argv[]) {
 	int fd_from, rbytes;
-	// max size of row in the menu, 
-	// will be used for going backwards (lseek) in file (in case of half reading a row).
-	int maxRowLen = 100;
-	int totalRead = 0;
+	int totalRead = 0, dishPrice = -1;
 	char resFileName[BUFFER_SIZE];
 	char buff[BUFFER_SIZE];
 	char dishToSearch[BUFFER_SIZE];
 	char* dishRow;
-	int dishPrice = -1;
 
 	if (argc != 3) {
 		fprintf(stderr, "Error: Invalid given arguments, should exactly two given\n");
 		return -1;
 	}
 
-	// adding file postfix (BBB -> BBB.txt)
+	// adding filename extension (BBB -> BBB.txt)
 	sprintf(resFileName, "%s.txt", argv[1]);
 	if ((fd_from = open(resFileName, O_RDONLY)) == -1) Error("Restaurant Not Found!");
 
@@ -50,7 +49,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		// if row wasn't found and/or price, going backwards in case of half reading
-		lseek(fd_from, totalRead - maxRowLen, SEEK_SET);
+		lseek(fd_from, totalRead - MAX_ROW_LEN, SEEK_SET);
 	} while (rbytes > 0);
 
 	close(fd_from);
@@ -64,9 +63,6 @@ int getRowPrice(char* dishRow) {
 	// terminating the dishRow at the first accurence of NIS
 	// => dishRow points on only one row.
 	*endOfDish = '\0';
-	// checking in case of user input non dish name(i.g dish type)
-	// so in this case we will have some \n in between.
-	if (strstr(dishRow, "\n") != NULL) return -1;
 
 	// iterating backwards (from price) until meeting space (end of price)
 	i = strlen(dishRow) - 1;

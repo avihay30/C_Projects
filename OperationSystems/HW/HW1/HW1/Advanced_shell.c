@@ -17,11 +17,13 @@ int isDelimeter(char);
 void initParams(char*[NUM_OF_PARAMS]);
 void freeAllParams(char*[NUM_OF_PARAMS]);
 
+/* Shell that supports original bin commends
+   and is extended with some other "new" commends that exists on the same dir */
 int main(int argc, char* argv[]) {
     char newCommend[BUFFER_SIZE];
     char commend[BUFFER_SIZE];
     char* params[NUM_OF_PARAMS];
-    // -1 returned value, in 3 bits (for returned value from WEXITSTATUS)
+    // -1 returned value (=255), in 3 bits (for returned value from WEXITSTATUS)
     int errExitStatus = 255;
     int returnStatus = -1;
 
@@ -33,8 +35,7 @@ int main(int argc, char* argv[]) {
         readCommend(commend, params);
 
         if (strcmp(commend, EXIT_COMMEND) == 0) {
-            fprintf(stdout, "GoodBye...\n");
-            return 0;
+            printf("GoodBye...\n"); return 0;
         }
 
         switch (fork()) {
@@ -50,8 +51,9 @@ int main(int argc, char* argv[]) {
             // executing new commend (if bin commend failed)
             sprintf(newCommend, "./%s", commend);
             execv(newCommend, params);
-            fprintf(stderr, "Not Supported\n");
-            // if child has not done any commend 
+
+            // if child has not done any commend
+            fprintf(stderr, "Not Supported\n"); 
             return -1;
         // Only parent execute this
         default:
@@ -60,7 +62,7 @@ int main(int argc, char* argv[]) {
             // if getPrice process has been ran, 
             // printing the returned price (if successful)
             if (strcmp(commend, "getPrice") == 0 && returnStatus != errExitStatus) {
-                fprintf(stdout, "%d NIS\n", returnStatus);
+                printf("%d NIS\n", returnStatus);
             }
             freeAllParams(params);
             break;
@@ -69,6 +71,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+// reset all param to NULL
 void initParams(char* params[NUM_OF_PARAMS]) {
     int i;
     for (i = 0; i < NUM_OF_PARAMS; i++) params[i] = NULL;
@@ -80,19 +83,19 @@ void Error(char* msg) {
 }
 
 void displayPrompt() {
-    fprintf(stdout, "AdvShell>");
+    printf("AdvShell>");
 }
 
+/* Function reads user inputand parse it into commendand his params,
+   insert the parsed commend into the given param of the function */
 void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
-    int currCharIdx = 0;
-    int paramIdx = 0;
-    int isEnclosed = 0;
+    int currCharIdx = 0, paramIdx = 0, isEnclosed = 0;
     char buffer[BUFFER_SIZE] = { '\0' };
     char someParam[BUFFER_SIZE] = { '\0' };
     char* tempStr;
-    fgets(buffer, BUFFER_SIZE, stdin);
 
-    // walk through all words in inputed buffer
+    fgets(buffer, BUFFER_SIZE, stdin);
+    // walk through each words in inputed buffer
     // until next char is emptyLine (line ended)
     while (buffer[currCharIdx] != '\n') {
         // handling case of spaces between input params
@@ -120,7 +123,7 @@ void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
     }
 }
 
-// returns trim current word (without white spaces)
+// returns trim current word (remove white spaces)
 char* getCurrentWord(char* str) {
     int i = 0;
     // checking if word is enclosed with "__" or '__'
@@ -139,6 +142,7 @@ char* getCurrentWord(char* str) {
     return str;
 }
 
+// checking if given char is some kind of a quote
 int isEnclosingQuote(char ch) {
     char quote[2] = "'";
     if (ch == '"' || ch == quote[0]) return 1;
