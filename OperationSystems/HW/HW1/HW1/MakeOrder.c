@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
 	// changing file to be read-only
 	chmod(orderFilePath, 0444);
-	fprintf(stdout, "Order created!");
+	printf("Order created!\n");
 	close(fd_to);
 	return 0;
 }
@@ -69,7 +69,7 @@ void getUserOrder(char* restName, Dish orderDishes[BUFFER_SIZE], int* dishesAmou
 	Dish* currDishPtr;
 
 	// get order input
-	fprintf(stdout, "Insert your order (Finish to finish):\n");
+	printf("Insert your order (Finish to finish):\n");
 	while (1) {
 		fgets(buffer, BUFFER_SIZE, stdin);
 		// trim all white spaces and '\n' in the end
@@ -130,7 +130,7 @@ void parseDish(char dishStr[BUFFER_SIZE], Dish* dish, char restName[BUFFER_SIZE]
 // trim all white spaces before and after the given string
 char* trim(char* str) {
 	int i;
-	removeEnding(str);
+	removeNewLine(str);
 	// remove spaces in the beginning
 	while (*str == ' ' || *str == '\t') str++;
 	// remove spaces in the end
@@ -162,7 +162,7 @@ void writeTitle(int fd_to, char* resturantName) {
 
 	sprintf(buffer, "%s Order\n\n", resturantName);
 	if (write(fd_to, buffer, strlen(buffer)) == -1) {
-		perror("write order title"); return -1;
+		perror("write order title"); exit(-1);
 	}
 }
 
@@ -174,7 +174,7 @@ void writeDishOrders(int fd_to, Dish orderDishes[BUFFER_SIZE], int dishesAmount)
 	for (i = 0; i < dishesAmount; i++) {
 		sprintf(buffer, "%s %d\n", orderDishes[i].name, orderDishes[i].amount);
 		if (write(fd_to, buffer, strlen(buffer)) == -1) {
-			perror("write order"); return -1;
+			perror("write order"); exit(-1);
 		}
 	}
 }
@@ -185,7 +185,7 @@ void writePrice(int fd_to, int totalPrice) {
 
 	sprintf(buffer, "Total Price: %d NIS\n\n", totalPrice);
 	if (write(fd_to, buffer, strlen(buffer)) == -1) {
-		perror("write order"); return -1;
+		perror("write order"); exit(-1);
 	}
 }
 
@@ -211,7 +211,7 @@ void writeDate(int fd_to) {
 	// writing the current date to file
 	sprintf(buffer, "%02d/%02d/%d\n", day, month, year);
 	if (write(fd_to, buffer, strlen(buffer)) == -1) {
-		perror("write date"); return(-1);
+		perror("write date"); exit(-1);
 	}
 }
 
@@ -230,7 +230,7 @@ void assertResturantExists(char* resturantName) {
 void assertConfirmation(int totalPrice) {
 	char buffer[BUFFER_SIZE] = { '\0' };
 	// getting confirm/cancel order from user
-	fprintf(stdout, "Total Price: %d NIS (Confirm to approve/else cancel)\n", totalPrice);
+	printf("Total Price: %d NIS (Confirm to approve/else cancel)\n", totalPrice);
 	fgets(buffer, BUFFER_SIZE, stdin);
 	// trim all white spaces and '\n' in the end
 	strcpy(buffer, trim(buffer));

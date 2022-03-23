@@ -83,7 +83,7 @@ void handleUserInput(int fd_to, int numOfItems) {
 
         // write dish type
         if (write(fd_to, bufToWrite, strlen(bufToWrite)) == -1) {
-            perror("write dish type"); return -1;
+            perror("write dish type"); exit(-1);
         }
 
         handleUserDishNames(fd_to);

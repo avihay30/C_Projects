@@ -30,9 +30,12 @@ int main(int argc, char* argv[]) {
     if (argc != 1) Error("Invalid given arguments, should not get arguments\n");
 
     while (1) {
+        newCommend[0] = '\0'; commend[0] = '\0';
         initParams(params);
         displayPrompt();
         readCommend(commend, params);
+        // skipping empty line
+        if (strlen(commend) == 0) continue;
 
         if (strcmp(commend, EXIT_COMMEND) == 0) {
             printf("GoodBye...\n"); return 0;

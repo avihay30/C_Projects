@@ -18,10 +18,10 @@ int main(int argc, char* argv[]) {
 
 	if (argc != 2) Error("Invalid given arguments, should exactly one given\n");
 
-	sprintf(resOrderDir, "./%s", argv[1]);
+	sprintf(resOrderDir, "./%s_Order", argv[1]);
 	// opening order directory
 	if ((fd = opendir(resOrderDir)) == NULL) {
-		fprintf(stderr, "Error: can't open %s\n", resOrderDir);
+		fprintf(stderr, "Resturant %s doesn't exists\n", argv[1]);
 		return -1;
 	}
 	while ((dp = readdir(fd)) != NULL) {
