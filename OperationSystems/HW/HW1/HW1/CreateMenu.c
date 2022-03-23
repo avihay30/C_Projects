@@ -20,28 +20,28 @@ void parseDish(char[BUFFER_SIZE], Dish*);
 int getNamePriceSpace(int);
 char* trim(char*);
 
-/* argv[1] shuold be resturant name
+/* argv[1] should be restaurant name
    argv[2] num of items to be inserted
-   gets user input of dishs in some resturant,
+   gets user input of dishes in some restaurant,
    and create menu file that holds all the contant */
 int main(int argc, char* argv[]) {
     int fd_to, numOfItems;
-    char resturantFileName[BUFFER_SIZE] = { '\0' };
+    char restaurantFileName[BUFFER_SIZE] = { '\0' };
     char bufToWrite[BUFFER_SIZE] = { '\0' };
 
     if (argc != 3) Error("Invalid given arguments, should exactly two given\n");
     
     numOfItems = atoi(argv[2]);
     // adding filename extension (BBB -> BBB.txt)
-    sprintf(resturantFileName, "%s.txt", argv[1]);
-    if ((fd_to = open(resturantFileName, O_WRONLY | O_CREAT, 0664)) == -1) {
-        perror("create/open manu"); return -1;
+    sprintf(restaurantFileName, "%s.txt", argv[1]);
+    if ((fd_to = open(restaurantFileName, O_WRONLY | O_CREAT, 0664)) == -1) {
+        perror("create/open menu"); return -1;
     }
     
-    // writing title on file (BBB Manu)
+    // writing title on file (BBB Menu)
     sprintf(bufToWrite, "%s Menu\n", argv[1]);
     if (write(fd_to, bufToWrite, strlen(bufToWrite)) == -1) {
-        perror("write resturant name"); return -1;
+        perror("write restaurant name"); return -1;
     }
 
     // get all user dish types and items, and write them to fd_to
@@ -105,7 +105,7 @@ void handleUserDishNames(int fd_to) {
         // trim all white spaces and '\n' in the end
         strcpy(dishName, trim(dishName));
 
-        // stop getting dishs from user
+        // stop getting dishes from user
         if (strcmp(dishName, "Stop") == 0) return;
         
         parseDish(dishName, &dish);

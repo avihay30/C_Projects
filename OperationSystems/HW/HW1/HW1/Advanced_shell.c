@@ -98,7 +98,7 @@ void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
     char* tempStr;
 
     fgets(buffer, BUFFER_SIZE, stdin);
-    // walk through each words in inputed buffer
+    // walk through each words in inputted buffer
     // until next char is emptyLine (line ended)
     while (buffer[currCharIdx] != '\n') {
         // handling case of spaces between input params

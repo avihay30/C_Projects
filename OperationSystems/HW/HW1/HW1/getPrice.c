@@ -11,9 +11,9 @@
 int getRowPrice(char*);
 void Error(char*);
 
-/* argv[1] shuold be resturant name
-   argv[2] shuold be dish name
-   returns the specipied resturant's dish price */
+/* argv[1] should be restaurant name
+   argv[2] should be dish name
+   returns the specified restaurant's dish price */
 int main(int argc, char* argv[]) {
 	int fd_from, rbytes;
 	int totalRead = 0, dishPrice = -1;
@@ -31,10 +31,10 @@ int main(int argc, char* argv[]) {
 	sprintf(resFileName, "%s.txt", argv[1]);
 	if ((fd_from = open(resFileName, O_RDONLY)) == -1) Error("Restaurant Not Found!");
 
-	// reading from opened resturant menu file
+	// reading from opened restaurant menu file
 	do {
 		if ((rbytes = read(fd_from, buff, BUFFER_SIZE)) == -1) {
-			perror("read resturant menu"); return -1;
+			perror("read restaurant menu"); return -1;
 		}
 		totalRead += rbytes;
 		// creating a search string (based on the format of CreateMenu)
@@ -60,7 +60,7 @@ int getRowPrice(char* dishRow) {
 	int i;
 	char* endOfDish = strstr(dishRow, "NIS\n");
 	if (endOfDish == NULL) return -1;
-	// terminating the dishRow at the first accurence of NIS
+	// terminating the dishRow at the first occurrence of NIS
 	// => dishRow points on only one row.
 	*endOfDish = '\0';
 

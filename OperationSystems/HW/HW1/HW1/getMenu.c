@@ -7,8 +7,8 @@
 
 void Error(char*);
 
-/* argv[1] shuold be resturant name
-   prints menu of specipied resturant */
+/* argv[1] should be restaurant name
+   prints menu of specified restaurant */
 int main(int argc, char* argv[]) {
 	int fd_from, rbytes, wbytes;
 	int fdStdout = 1;
@@ -20,12 +20,12 @@ int main(int argc, char* argv[]) {
 	// adding filename extension (BBB -> BBB.txt)
 	sprintf(resFileName, "%s.txt", argv[1]);
 	if ((fd_from = open(resFileName, O_RDONLY)) == -1) {
-		perror("open resturant menu"); return -1;
+		perror("open restaurant menu"); return -1;
 	}
 
-	// reading from opened resturant menu file and writing to stdout(screen)
+	// reading from opened restaurant menu file and writing to stdout(screen)
 	if ((rbytes = read(fd_from, buff, BUFFER_SIZE)) == -1) {
-		perror("read resturant menu"); return -1;
+		perror("read restaurant menu"); return -1;
 	}
 	while (rbytes > 0) {
 		if ((wbytes = write(fdStdout, buff, rbytes)) == -1) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 			fprintf(stderr, "bad write\n"); return -1;
 		}
 		if ((rbytes = read(fd_from, buff, BUFFER_SIZE)) == -1) {
-			perror("read1 resturant menu"); return -1;
+			perror("read1 restaurant menu"); return -1;
 		}
 	}
 	close(fd_from);

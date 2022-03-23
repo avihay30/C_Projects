@@ -22,12 +22,13 @@ void writeTitle(int, char*);
 void writeDishOrders(int, Dish[BUFFER_SIZE], int);
 void writePrice(int, int);
 void writeDate(int);
-void assertResturantExists(char*);
+void assertRestaurantExists(char*);
 void assertConfirmation(int);
 void Error(char*);
 
-// argv[1] shuold be resturant name
-// argv[2] shuold be customer name
+/* argv[1] should be restaurant name
+   argv[2] should be customer name 
+   user enters an order of some given restaurant */
 int main(int argc, char* argv[]) {
 	int fd_to, dishesAmount = 0, totalPrice = 0;
 	char orderFilePath[BUFFER_SIZE];
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
 		return(1);
 	}
 
-	assertResturantExists(argv[1]);
+	assertRestaurantExists(argv[1]);
 	// getting order info from user and insert it into `orderDishes` array and amount
 	getUserOrder(argv[1], orderDishes, &dishesAmount);
 	// calculating total price
@@ -104,7 +105,7 @@ void parseDish(char dishStr[BUFFER_SIZE], Dish* dish, char restName[BUFFER_SIZE]
 	dishStr[i] = '\0';
 	strcpy(dish->name, dishStr);
 
-	// calling getPrice process to recive price of dish
+	// calling getPrice process to receive price of dish
 	switch (fork()) {
 		// if fork failed
 	case -1:
@@ -157,10 +158,10 @@ int getTotalPrice(Dish orderDishes[BUFFER_SIZE], int orderSize) {
 }
 
 // writing title to order file
-void writeTitle(int fd_to, char* resturantName) {
+void writeTitle(int fd_to, char* restaurantName) {
 	char buffer[BUFFER_SIZE] = { '\0' };
 
-	sprintf(buffer, "%s Order\n\n", resturantName);
+	sprintf(buffer, "%s Order\n\n", restaurantName);
 	if (write(fd_to, buffer, strlen(buffer)) == -1) {
 		perror("write order title"); exit(-1);
 	}
@@ -215,12 +216,12 @@ void writeDate(int fd_to) {
 	}
 }
 
-/* checking if Resturant is exists by trying to open Resturant menu file
+/* checking if Restaurant is exists by trying to open Restaurant menu file
    if not, printing an error and exit program */
-void assertResturantExists(char* resturantName) {
+void assertRestaurantExists(char* restaurantName) {
 	char resFileName[BUFFER_SIZE];
 	// adding file postfix (BBB -> BBB.txt)
-	sprintf(resFileName, "%s.txt", resturantName);
+	sprintf(resFileName, "%s.txt", restaurantName);
 	// checking only if restaurant is exists.
 	if (open(resFileName, O_RDONLY) == -1) Error("Restaurant Not Found!");
 }

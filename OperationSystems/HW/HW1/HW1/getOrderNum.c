@@ -8,8 +8,8 @@
 int isTextFile(struct dirent*);
 void Error(char*);
 
-/* argv[1] shuold be resturant name
-   prints num of orders of specipied resturant */
+/* argv[1] should be restaurant name
+   prints num of orders of specified restaurant */
 int main(int argc, char* argv[]) {
 	int numOfFiles = 0;
 	char resOrderDir[BUFFER_SIZE];
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 	sprintf(resOrderDir, "./%s_Order", argv[1]);
 	// opening order directory
 	if ((fd = opendir(resOrderDir)) == NULL) {
-		fprintf(stderr, "Resturant %s doesn't exists\n", argv[1]);
+		fprintf(stderr, "Restaurant %s doesn't exists\n", argv[1]);
 		return -1;
 	}
 	while ((dp = readdir(fd)) != NULL) {
