@@ -49,7 +49,7 @@ int main(int argc, char* args[]) {
     // waiting only for the print function - last thread
     // the function running only 20 seconds.
     pthread_join(threads[numOfThreads - 1], NULL);
-
+    free(counters);
     return 0;
 }
 
