@@ -12,7 +12,9 @@ void Error(char*);
 void displayPrompt();
 void readCommend(char*, char*[NUM_OF_PARAMS]);
 char* getCurrentWord(char*);
-int isEnclosingQuote(char);
+int isSpacialHandling(char*, int);
+char* trim(char*);
+void removeNewLine(char*);
 int isDelimeter(char);
 void initParams(char*[NUM_OF_PARAMS]);
 void freeAllParams(char*[NUM_OF_PARAMS]);
@@ -20,8 +22,8 @@ void freeAllParams(char*[NUM_OF_PARAMS]);
 /* Shell that supports original bin commends
    and is extended with some other "new" commends that exists on the same dir */
 int main(int argc, char* argv[]) {
-    char newCommend[BUFFER_SIZE];
-    char commend[BUFFER_SIZE];
+    char newCommend[BUFFER_SIZE] = { '\0' };
+    char commend[BUFFER_SIZE] = { '\0' };
     char* params[NUM_OF_PARAMS];
     // -1 returned value (=255), in 3 bits (for returned value from WEXITSTATUS)
     int errExitStatus = 255;
@@ -92,7 +94,7 @@ void displayPrompt() {
 /* Function reads user inputand parse it into commendand his params,
    insert the parsed commend into the given param of the function */
 void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
-    int currCharIdx = 0, paramIdx = 0, isEnclosed = 0;
+    int currCharIdx = 0, paramIdx = 0;
     char buffer[BUFFER_SIZE] = { '\0' };
     char someParam[BUFFER_SIZE] = { '\0' };
     char* tempStr;
@@ -104,13 +106,14 @@ void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
         // handling case of spaces between input params
         if (isDelimeter(buffer[currCharIdx])) currCharIdx++;
         else {
-            // setting tempStr to hold rest of buffer
+            // setting someParam to hold rest of buffer
             strcpy(someParam, buffer + currCharIdx);
-            isEnclosed = isEnclosingQuote(*someParam);
+
+            // if command get get param input with multiple words
+            if (isSpacialHandling(commend, paramIdx)) tempStr = trim(someParam);           
             // tempStr will hold the first word until some delimeter
-            tempStr = getCurrentWord(someParam);
-            // skipping first quote
-            if (isEnclosed) tempStr = someParam + 1;
+            else tempStr = getCurrentWord(someParam);
+            
             // setting first word to be the commend
             if (paramIdx == 0) strcpy(commend, tempStr);
 
@@ -120,8 +123,6 @@ void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
 
             // moving index in order to find the next word, if exists
             currCharIdx += strlen(tempStr);
-            // if commend had Quotes skipping them
-            if (isEnclosed) currCharIdx += 2;
         }
     }
 }
@@ -129,27 +130,41 @@ void readCommend(char* commend, char* params[NUM_OF_PARAMS]) {
 // returns trim current word (remove white spaces)
 char* getCurrentWord(char* str) {
     int i = 0;
-    // checking if word is enclosed with "__" or '__'
-    if (isEnclosingQuote(*str)) {
-        i++;
-        // removing first show of "__" or '__'
-        str++;
-        while (!isEnclosingQuote(*(str + i))) i++;
-    // handling case of regular word, stops at some delimeter
-    }
-    else {
-        while (!isDelimeter(*(str + i))) i++;
-    }
+    // running on a word, stops at some delimeter
+    while (!isDelimeter(*(str + i))) i++;
  
     *(str + i) = '\0';
     return str;
 }
 
-// checking if given char is some kind of a quote
-int isEnclosingQuote(char ch) {
-    char quote[2] = "'";
-    if (ch == '"' || ch == quote[0]) return 1;
+/* checking if given paramIdx is the last arg in a(getPrice / MakeOrder) command
+   for handling later in multiple word as one argument */
+int isSpacialHandling(char* command, int paramIdx) {
+    // checking if idx is on name of dish to get price for, or costumer's order name
+    if (paramIdx == 2 && strcmp(command, "getPrice") == 0) return 1;
+    if (paramIdx == 2 && strcmp(command, "MakeOrder") == 0) return 1;
+
     return 0;
+}
+
+// trim all white spaces before and after the given string
+char* trim(char* str) {
+    int i;
+    removeNewLine(str);
+    // remove spaces in the beginning
+    while (*str == ' ' || *str == '\t') str++;
+    // remove spaces in the end
+    i = strlen(str) - 1;
+    while (*(str + i) == ' ' || *(str + i) == '\t') i--;
+    *(str + (i + 1)) = '\0';
+
+    return str;
+}
+
+// removes \n in the end of the string
+void removeNewLine(char* str) {
+    if (str[strlen(str) - 1] == '\n')
+        str[strlen(str) - 1] = '\0';
 }
 
 // returns true if the specified char is a delimiter.
